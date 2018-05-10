@@ -85,8 +85,9 @@ namespace BookingServer
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("Administrator",
-                    policy => policy.RequireClaim("Admin")
+                    policy => policy.RequireRole("Admin")
                     );
+
             });
 
             services.AddCors(options =>

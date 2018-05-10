@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace BookingServer.Models.Accommodations
 {
     public partial class AccBooking
     {
         public int BookingId { get; set; }
+        [Required]
         public int UserId { get; set; }
+        [Required]
         public int AccId { get; set; }
         public int NumOfNights { get; set; }
         public DateTime BookDate { get; set; }

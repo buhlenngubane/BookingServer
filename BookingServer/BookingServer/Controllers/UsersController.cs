@@ -39,8 +39,8 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = await _context.User.SingleOrDefaultAsync(m => m.Email == email); //&& m.Password == password);
-            var userp = await _context.User.SingleOrDefaultAsync(m => m.Password == password);
+            var user = await _context.User.SingleOrDefaultAsync(m => m.Email.Equals(email)); //&& m.Password == password);
+            var userp = await _context.User.SingleOrDefaultAsync(m => m.Password.Equals(password));
 
             try
             {
@@ -60,8 +60,13 @@ namespace BookingServer.Controllers
                 Console.WriteLine("Error : "+ex);
                 return BadRequest();
             }
+            //User sendUser = new User(user.Name,user.Email);
+            user.Password = "Default@password123";
+            //sendUser.UserId = user.UserId;
+            //sendUser.Name = user.Name;
 
-            return Ok(user.UserId);
+            //return Ok("{userId:"+user.UserId+", name:"+user.Name+"}");
+            return Ok(user);
         }
 
         // PUT: api/Users/5
@@ -73,8 +78,13 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (UserIdExists(user.UserId))
+            if (UserEmailExists(user.Email))
             {
+                var saveUser = await _context.User.SingleOrDefaultAsync(m=>m.Email.Equals(user.Email));
+                if(user.Password.Equals("Default@password123"))
+                {
+                    user.Password = saveUser.Password;
+                }
                 try
                 {
                     _context.Entry(user).State = EntityState.Modified;
@@ -107,7 +117,7 @@ namespace BookingServer.Controllers
             _context.User.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.UserId }, user.UserId);
+            return CreatedAtAction("GetUser", new { id = user.UserId });
         }
 
         /*[HttpPost]

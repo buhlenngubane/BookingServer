@@ -28,31 +28,39 @@ namespace BookingServer.Controllers
         }
 
         [HttpGet(), Authorize]
-        public IActionResult SignIn()
+        public async Task<IActionResult> SignIn()
         {
-            var userName = User.Identity.Name;
-            return Ok(userName);
+            var user = await _context.User.SingleOrDefaultAsync(m => m.Email.Equals(User.Identity.Name));
+            //User sendUser = new User(user.Name,user.Email);
+            user.Password = "Default@password123";
+            //var userName = User.Identity.Name;
+            return Ok(user);
         }
 
         [AllowAnonymous]
-        [HttpPost]
-        public async Task<IActionResult> CreateToken([FromBody]User login)
+        [HttpGet("{email}&{password}")]
+        public async Task<IActionResult> CreateToken([FromRoute]string email, string password)
         {
             if (ModelState.IsValid)
             {
                 IActionResult response = Unauthorized();
-                var user = await _context.User.SingleOrDefaultAsync(m => m.Email.Equals(login.Email));
-                var userP = await _context.User.SingleOrDefaultAsync(m =>  m.Password.Equals(login.Password));
-
-                if (user.Equals(null) || userP.Equals(null))
-                {
-                    return user.Equals(null) ? NotFound("Email not found") : NotFound("Password not found");
-                }
+                var user = await _context.User.SingleOrDefaultAsync(m => m.Email.Equals(email));
+                var userP = await _context.User.SingleOrDefaultAsync(m =>  m.Password.Equals(password));
 
                 try
-                {
+                { 
+                    if (user.Equals(null) || userP.Equals(null))
+                    {
+                        return user.Equals(null) ? 
+                            NotFound("Email not found") : NotFound("Password not found");
+                    }
+                    else if (!user.UserId.Equals(userP.UserId))
+                    {
+                        return BadRequest();
+                    }
+
                     var tokenString = BuildToken(user);
-                    response = Ok(new { token = tokenString });
+                        response = Ok(new { token = tokenString });
                 }
                 catch (Exception ex)
                 {
@@ -62,7 +70,7 @@ namespace BookingServer.Controllers
                 return response;
 
             }
-            return Error("Unknown error! "+login.Email);
+            return Error("Unknown error! ");
         }
 
         private string BuildToken(User user)
@@ -81,8 +89,10 @@ namespace BookingServer.Controllers
 
                 Claim[] claims = new[]
                 {
-                    new Claim(ClaimTypes.Name,user.Name),
-                    new Claim(role, "")
+                    new Claim(ClaimTypes.Name,user.Email),
+                    new Claim(ClaimTypes.GroupSid,user.UserId.ToString()),
+                    new Claim(ClaimTypes.Role, role)
+                    
                 };
 
                 var token = new JwtSecurityToken(_options.Issuer,
