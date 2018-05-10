@@ -27,6 +27,13 @@ namespace BookingServer.Controllers
             _options = optionsAccessor.Value;
         }
 
+        [HttpGet(), Authorize]
+        public IActionResult SignIn()
+        {
+            var userName = User.Identity.Name;
+            return Ok(userName);
+        }
+
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> CreateToken([FromBody]User login)

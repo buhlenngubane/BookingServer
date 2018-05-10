@@ -24,7 +24,7 @@ namespace BookingServer.Controllers
         }
 
         // GET: api/Bookings
-        [HttpGet, Authorize(Policy = "Administrator")]
+        [HttpGet]
         public IEnumerable<AccBooking> GetAll()
         {
             //if(!id.Equals(1))
@@ -32,23 +32,45 @@ namespace BookingServer.Controllers
             return _context.AccBooking;
         }
 
-        // GET: api/Bookings/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetBooking([FromRoute] int id)
+        [HttpGet("{AccId}")]
+        public async Task<IActionResult> GetBooking([FromRoute] int AccId)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var booking = await _context.AccBooking.SingleOrDefaultAsync(m => m.UserId.Equals(id));
+            var bookings = from m in _context.AccBooking
+                           select m;
 
-            if (booking == null)
+            //if (!String.IsNullOrEmpty(searchString))
+            //{
+                bookings = bookings.Where(s => s.AccId.Equals(AccId));
+
+            //var booking = await _context.AccBooking.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
+
+            if (bookings == null)
             {
                 return NotFound();
             }
 
-            return Ok(booking);
+            return View(await bookings.ToListAsync()); ;
+            
+        }
+
+        // GET: api/Bookings/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetBookings([FromRoute] int id)
+        {
+            var bookings = from m in _context.AccBooking
+                           select m;
+
+            //if (!String.IsNullOrEmpty(searchString))
+            //{
+            bookings = bookings.Where(s => s.UserId.Equals(id));
+            //}
+
+            return View(await bookings.ToListAsync());
         }
 
         // PUT: api/Bookings/5

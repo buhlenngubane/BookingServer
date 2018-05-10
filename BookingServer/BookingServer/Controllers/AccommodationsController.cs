@@ -28,25 +28,58 @@ namespace BookingServer.Controllers
             return _context.Accommodation;
         }
 
-        // GET: api/Accommodations/South Africa & Duran
-        [HttpGet("{Country}&{Location}")]
-        public async Task<IActionResult> SpecificCountry([FromRoute] string Country, string Location)
+        [HttpGet("{Country}")]
+        public async Task<IActionResult> SpecificCountry([FromRoute] string Country)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var accommodation = await
-                _context.Accommodation.SingleOrDefaultAsync(m => 
-                m.Country.Equals(Country) && m.Location.Equals(Location));
+            var accommodation = from m in _context.Accommodation
+                           select m;
+
+            if (!String.IsNullOrEmpty(Country))
+            {
+                accommodation = accommodation.Where(s => s.Country.Contains(Country));
+            }
 
             if (accommodation == null)
             {
                 return NotFound();
             }
 
-            return Ok(accommodation);
+            return View(await accommodation.ToListAsync());
+        }
+
+        // GET: api/Accommodations/South Africa & Duran
+        [HttpGet("{Country}&{Location}")]
+        public async Task<IActionResult> SpecificLocation([FromRoute] string Country, string Location)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var accommodation = from m in _context.Accommodation
+                                select m;
+
+            if (!String.IsNullOrEmpty(Country) && !String.IsNullOrEmpty(Country))
+            {
+                accommodation = 
+                    accommodation.Where(s => s.Country.Equals(Country) && s.Location.Contains(Location));
+            }
+
+            /*var accommodation = await
+                _context.Accommodation.SingleOrDefaultAsync(m => 
+                m.Country.Equals(Country) && m.Location.Contains(Location));*/
+
+            if (accommodation == null)
+            {
+                return NotFound();
+            }
+
+            return View(await accommodation.ToListAsync());
         }
 
         // PUT: api/Accommodations
@@ -80,7 +113,7 @@ namespace BookingServer.Controllers
             return NoContent();
         }
 
-        // POST: api/Accommodations
+        // POST: api/Accommodations/PostAccommodation
         [HttpPost, Authorize(Policy = "Administrator")]
         public async Task<IActionResult> PostAccommodation( 
             [FromBody] Accommodation accommodation)

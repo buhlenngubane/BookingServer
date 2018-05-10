@@ -11,7 +11,7 @@ namespace BookingServer.Models.AirTaxis
         public virtual DbSet<Taxi> Taxi { get; set; }
 
         public AirTaxiDBContext(DbContextOptions<AirTaxiDBContext> options) :
-            base()
+            base(options)
         {
             Database.EnsureCreated();
         }

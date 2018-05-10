@@ -39,7 +39,7 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = await _context.User.SingleOrDefaultAsync(m => m.Email == email);
+            var user = await _context.User.SingleOrDefaultAsync(m => m.Email == email); //&& m.Password == password);
             var userp = await _context.User.SingleOrDefaultAsync(m => m.Password == password);
 
             try
@@ -49,14 +49,19 @@ namespace BookingServer.Controllers
                     return user.Equals(null) ? 
                         NotFound("Email not found") : NotFound("Password not found");
                 }
+                else if(!user.UserId.Equals(userp.UserId))
+                {
+                    Console.WriteLine("Possible hack!!!");
+                    return BadRequest();
+                }
             }
             catch(Exception ex)
             {
-                Console.WriteLine("Error : "+ex.Message);
+                Console.WriteLine("Error : "+ex);
                 return BadRequest();
             }
 
-            return Ok(user);
+            return Ok(user.UserId);
         }
 
         // PUT: api/Users/5
@@ -102,10 +107,10 @@ namespace BookingServer.Controllers
             _context.User.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+            return CreatedAtAction("GetUser", new { id = user.UserId }, user.UserId);
         }
 
-        [HttpPost]
+        /*[HttpPost]
         public async Task<IActionResult> SignIn([FromBody] User userRequest)
         {
             //Console.WriteLine("Models=State passed: " + userRequest.Email);
@@ -133,7 +138,7 @@ namespace BookingServer.Controllers
             
 
             
-        }
+        }*/
 
         // DELETE: api/Users/5
         [HttpDelete("{email}"),Authorize]
@@ -153,7 +158,7 @@ namespace BookingServer.Controllers
             _context.User.Remove(user);
             await _context.SaveChangesAsync();
 
-            return Ok(user);
+            return Ok(user.Name);
         }
 
         private bool UserIdExists(int id)

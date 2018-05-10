@@ -36,14 +36,18 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var @property = await _context.Property.SingleOrDefaultAsync(m => m.AccId == AccId);
+            var @property = from m in _context.Accommodation
+                            select m;
+
+            @property = @property.Where(m => m.AccId.Equals(AccId));
+            //await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
 
             if (@property == null)
             {
                 return NotFound();
             }
 
-            return Ok(@property);
+            return View(await @property.ToListAsync());
         }
 
         [HttpGet("{AccId}&{PropName}")]
@@ -54,14 +58,22 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var @property = await _context.Property.SingleOrDefaultAsync(m => m.AccId == AccId && m.PropName.Equals(PropName));
+            /*var @property = 
+                await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId) && 
+                m.PropName.Contains(PropName));*/
+            var @property = from m in _context.Property
+                            select m;
+
+            @property = @property.Where(m => m.AccId.Equals(AccId) &&
+                m.PropName.Contains(PropName));
+            //await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
 
             if (@property == null)
             {
                 return NotFound();
             }
 
-            return Ok(@property);
+            return View(await @property.ToListAsync());
         }
 
         // PUT: api/Properties/5
