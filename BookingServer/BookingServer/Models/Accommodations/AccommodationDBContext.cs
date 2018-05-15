@@ -10,7 +10,8 @@ namespace BookingServer.Models.Accommodations
         public virtual DbSet<Accommodation> Accommodation { get; set; }
         public virtual DbSet<Property> Property { get; set; }
 
-        public AccommodationDBContext(DbContextOptions<AccommodationDBContext> options) : base(options)
+        public AccommodationDBContext(DbContextOptions<AccommodationDBContext> options)
+            : base(options)
         {
             Database.EnsureCreated();
         }
@@ -55,15 +56,15 @@ namespace BookingServer.Models.Accommodations
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.Property(e => e.Picture).IsRequired();
             });
 
             modelBuilder.Entity<Property>(entity =>
             {
                 entity.HasKey(e => e.PropId);
 
-                entity.Property(e => e.PicDirectory)
-                    .IsRequired()
-                    .IsUnicode(false);
+                entity.Property(e => e.Picture).IsRequired();
 
                 entity.Property(e => e.PropName)
                     .IsRequired()

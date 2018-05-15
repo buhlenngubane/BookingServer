@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace BookingServer.Controllers
 {
     [Produces("application/json")]
-    [Route("api/Bookings/[action]"), Authorize]
+    [Route("api/AccBookings/[action]"), Authorize]
     public class AccBookingsController : Controller
     {
         private readonly AccommodationDBContext _context;
@@ -22,6 +22,8 @@ namespace BookingServer.Controllers
             _context = context;
             _userDB = userDB;
         }
+
+        
 
         // GET: api/Bookings
         [HttpGet]
@@ -75,7 +77,7 @@ namespace BookingServer.Controllers
 
         // PUT: api/Bookings/5
         [HttpPut("{email}")]
-        public async Task<IActionResult> PutBooking([FromRoute] string email, [FromBody] AccBooking booking)
+        public async Task<IActionResult> Update([FromRoute] string email, [FromBody] AccBooking booking)
         {
             if (!ModelState.IsValid || !UserExists(email))
             {
@@ -107,7 +109,7 @@ namespace BookingServer.Controllers
 
         // POST: api/Bookings
         [HttpPost]
-        public async Task<IActionResult> PostBooking([FromBody] AccBooking booking)
+        public async Task<IActionResult> New([FromBody] AccBooking booking)
         {
             if (!ModelState.IsValid)
             {
@@ -130,7 +132,7 @@ namespace BookingServer.Controllers
 
         // DELETE: api/Bookings/5
         [HttpDelete("{UserId}"), Authorize(Policy = "Administrator")]
-        public async Task<IActionResult> DeleteBooking([FromRoute] int UserId)
+        public async Task<IActionResult> Delete([FromRoute] int UserId)
         {
             if (!ModelState.IsValid)
             {

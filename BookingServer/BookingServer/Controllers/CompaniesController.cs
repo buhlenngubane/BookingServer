@@ -10,7 +10,7 @@ using BookingServer.Models.CarRentals;
 namespace BookingServer.Controllers
 {
     [Produces("application/json")]
-    [Route("api/Companies")]
+    [Route("api/Companies/[action]")]
     public class CompaniesController : Controller
     {
         private readonly CarRentalDBContext _context;
@@ -22,7 +22,7 @@ namespace BookingServer.Controllers
 
         // GET: api/Companies
         [HttpGet]
-        public IEnumerable<Company> GetCompany()
+        public IEnumerable<Company> GetAll()
         {
             return _context.Company;
         }

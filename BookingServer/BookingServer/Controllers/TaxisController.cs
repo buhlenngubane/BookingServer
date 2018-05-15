@@ -10,7 +10,7 @@ using BookingServer.Models.AirTaxis;
 namespace BookingServer.Controllers
 {
     [Produces("application/json")]
-    [Route("api/Taxis")]
+    [Route("api/Taxis/[action]")]
     public class TaxisController : Controller
     {
         private readonly AirTaxiDBContext _context;
@@ -22,7 +22,7 @@ namespace BookingServer.Controllers
 
         // GET: api/Taxis
         [HttpGet]
-        public IEnumerable<Taxi> GetTaxi()
+        public IEnumerable<Taxi> GetAll()
         {
             return _context.Taxi;
         }

@@ -14,7 +14,7 @@ namespace BookingServer.Models.Accommodations
         public int AccId { get; set; }
         public string Country { get; set; }
         public string Location { get; set; }
-        public int PropCount { get; set; }
+        public byte[] Picture { get; set; }
 
         public ICollection<AccBooking> AccBooking { get; set; }
         public ICollection<Property> Property { get; set; }

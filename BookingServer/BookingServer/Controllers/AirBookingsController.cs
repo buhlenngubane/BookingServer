@@ -6,11 +6,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.AirTaxis;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingServer.Controllers
 {
     [Produces("application/json")]
-    [Route("api/AirBookings")]
+    [Route("api/AirBookings/[action]"), Authorize]
     public class AirBookingsController : Controller
     {
         private readonly AirTaxiDBContext _context;
@@ -22,7 +23,7 @@ namespace BookingServer.Controllers
 
         // GET: api/AirBookings
         [HttpGet]
-        public IEnumerable<AirBooking> GetAirBooking()
+        public IEnumerable<AirBooking> GetAll()
         {
             return _context.AirBooking;
         }

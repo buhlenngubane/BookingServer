@@ -9,8 +9,8 @@ namespace BookingServer.Models.Accommodations
         public int AccId { get; set; }
         public string PropName { get; set; }
         public int PricePerNight { get; set; }
-        public string PicDirectory { get; set; }
         public int AvailableRooms { get; set; }
+        public byte[] Picture { get; set; }
 
         public Accommodation Acc { get; set; }
     }
