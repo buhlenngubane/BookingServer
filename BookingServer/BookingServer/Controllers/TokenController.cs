@@ -32,7 +32,7 @@ namespace BookingServer.Controllers
         {
             var user = await _context.User.SingleOrDefaultAsync(m => m.Email.Equals(User.Identity.Name));
             //User sendUser = new User(user.Name,user.Email);
-            user.Password = "Default@password123";
+            user.Password = "";
             //var userName = User.Identity.Name;
             return Ok(user);
         }

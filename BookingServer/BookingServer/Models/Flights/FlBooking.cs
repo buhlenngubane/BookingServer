@@ -5,7 +5,7 @@ namespace BookingServer.Models.Flights
 {
     public partial class FlBooking
     {
-        public int BookingId { get; set; }
+        public int BookId { get; set; }
         public int UserId { get; set; }
         public int FlightId { get; set; }
         public DateTime BookDate { get; set; }

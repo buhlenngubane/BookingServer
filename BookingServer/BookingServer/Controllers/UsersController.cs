@@ -61,7 +61,7 @@ namespace BookingServer.Controllers
                 return BadRequest();
             }
             //User sendUser = new User(user.Name,user.Email);
-            user.Password = "Default@password123";
+            //user.Password = "";
             //sendUser.UserId = user.UserId;
             //sendUser.Name = user.Name;
 
@@ -81,13 +81,14 @@ namespace BookingServer.Controllers
             if (UserEmailExists(user.Email))
             {
                 var saveUser = await _context.User.SingleOrDefaultAsync(m=>m.Email.Equals(user.Email));
-                if(user.Password.Equals("Default@password123"))
+                /*if(user.Password.Equals("Default@1234Booking"))
                 {
                     user.Password = saveUser.Password;
-                }
+                }*/
+
                 try
                 {
-                    _context.Entry(user).State = EntityState.Modified;
+                    _context.Entry(saveUser).State = EntityState.Modified;
                     Console.WriteLine("State change, yet to save.");
                     await _context.SaveChangesAsync();
                     Console.WriteLine("Saved.");

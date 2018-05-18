@@ -6,62 +6,61 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Flights;
-using Microsoft.AspNetCore.Authorization;
 
 namespace BookingServer.Controllers
 {
     [Produces("application/json")]
-    [Route("api/Flights/[action]")]
-    public class FlightsController : Controller
+    [Route("api/Details/[action]")]
+    public class DetailsController : Controller
     {
         private readonly FlightDBContext _context;
 
-        public FlightsController(FlightDBContext context)
+        public DetailsController(FlightDBContext context)
         {
             _context = context;
         }
 
-        // GET: api/Flights
+        // GET: api/Details
         [HttpGet]
-        public IEnumerable<Flight> GetAll()
+        public IEnumerable<Detail> GetDetail()
         {
-            return _context.Flight;
+            return _context.Detail;
         }
 
-        // GET: api/Flights/5
+        // GET: api/Details/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetFlight([FromRoute] int id)
+        public async Task<IActionResult> GetDetail([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var flight = await _context.Flight.SingleOrDefaultAsync(m => m.FlightId == id);
+            var detail = await _context.Detail.SingleOrDefaultAsync(m => m.FdetailId == id);
 
-            if (flight == null)
+            if (detail == null)
             {
                 return NotFound();
             }
 
-            return Ok(flight);
+            return Ok(detail);
         }
 
-        // PUT: api/Flights/5
-        [HttpPut("{id}"), Authorize(Policy = "Administrator")]
-        public async Task<IActionResult> PutFlight([FromRoute] int id, [FromBody] Flight flight)
+        // PUT: api/Details/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutDetail([FromRoute] int id, [FromBody] Detail detail)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != flight.FlightId)
+            if (id != detail.FdetailId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(flight).State = EntityState.Modified;
+            _context.Entry(detail).State = EntityState.Modified;
 
             try
             {
@@ -69,7 +68,7 @@ namespace BookingServer.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!FlightExists(id))
+                if (!DetailExists(id))
                 {
                     return NotFound();
                 }
@@ -82,45 +81,45 @@ namespace BookingServer.Controllers
             return NoContent();
         }
 
-        // POST: api/Flights
-        [HttpPost, Authorize(Policy = "Administrator")]
-        public async Task<IActionResult> PostFlight([FromBody] Flight flight)
+        // POST: api/Details
+        [HttpPost]
+        public async Task<IActionResult> PostDetail([FromBody] Detail detail)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Flight.Add(flight);
+            _context.Detail.Add(detail);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetFlight", new { id = flight.FlightId }, flight);
+            return CreatedAtAction("GetDetail", new { id = detail.FdetailId }, detail);
         }
 
-        // DELETE: api/Flights/5
-        [HttpDelete("{id}"), Authorize(Policy = "Administrator")]
-        public async Task<IActionResult> DeleteFlight([FromRoute] int id)
+        // DELETE: api/Details/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDetail([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var flight = await _context.Flight.SingleOrDefaultAsync(m => m.FlightId == id);
-            if (flight == null)
+            var detail = await _context.Detail.SingleOrDefaultAsync(m => m.FdetailId == id);
+            if (detail == null)
             {
                 return NotFound();
             }
 
-            _context.Flight.Remove(flight);
+            _context.Detail.Remove(detail);
             await _context.SaveChangesAsync();
 
-            return Ok(flight);
+            return Ok(detail);
         }
 
-        private bool FlightExists(int id)
+        private bool DetailExists(int id)
         {
-            return _context.Flight.Any(e => e.FlightId == id);
+            return _context.Detail.Any(e => e.FdetailId == id);
         }
     }
 }

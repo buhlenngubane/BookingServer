@@ -23,10 +23,8 @@ namespace BookingServer.Controllers
             _userDB = userDB;
         }
 
-        
-
         // GET: api/Bookings
-        [HttpGet]
+        [HttpGet, Authorize(Policy = "Administrator")]
         public IEnumerable<AccBooking> GetAll()
         {
             //if(!id.Equals(1))
@@ -34,45 +32,39 @@ namespace BookingServer.Controllers
             return _context.AccBooking;
         }
 
-        [HttpGet("{AccId}")]
+        [HttpGet("{AccId}"), Authorize(Policy ="Administrator")]
         public async Task<IActionResult> GetBooking([FromRoute] int AccId)
         {
-            if (!ModelState.IsValid)
+
+            if (_context.AccBooking.ToList().Exists(m=>m.AccId.Equals(AccId)))
             {
-                return BadRequest(ModelState);
+                var user = _context.AccBooking.Where(m => m.AccId.Equals(AccId));
+                Console.WriteLine("Users" + user);
+                return Ok(await user.ToListAsync());
             }
 
-            var bookings = from m in _context.AccBooking
-                           select m;
+            Console.WriteLine("Should be true "+_context.Accommodation.Any(m => m.AccId.Equals(AccId)));
 
-            //if (!String.IsNullOrEmpty(searchString))
-            //{
-                bookings = bookings.Where(s => s.AccId.Equals(AccId));
-
-            //var booking = await _context.AccBooking.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
-
-            if (bookings == null)
-            {
-                return NotFound();
-            }
-
-            return View(await bookings.ToListAsync()); ;
-            
+            if (_context.Accommodation.Any(m => m.AccId.Equals(AccId)))
+                return NotFound(AccId + ",Not yet booked");
+            else
+                return BadRequest();
         }
 
         // GET: api/Bookings/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBookings([FromRoute] int id)
         {
-            var bookings = from m in _context.AccBooking
-                           select m;
-
-            //if (!String.IsNullOrEmpty(searchString))
-            //{
-            bookings = bookings.Where(s => s.UserId.Equals(id));
-            //}
-
-            return View(await bookings.ToListAsync());
+            if (_context.AccBooking.ToList().Exists(m => m.UserId.Equals(id)))
+            {
+                var user = _context.AccBooking.Where(m => m.UserId.Equals(id));
+                Console.WriteLine("Users" + user);
+                return Ok(await user.ToListAsync());
+            }
+            
+                return NotFound("No accommodations booked.");
+            //else
+                //return BadRequest();
         }
 
         // PUT: api/Bookings/5

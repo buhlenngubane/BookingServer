@@ -37,7 +37,7 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var flBooking = await _context.FlBooking.SingleOrDefaultAsync(m => m.BookingId == id);
+            var flBooking = await _context.FlBooking.SingleOrDefaultAsync(m => m.BookId == id);
 
             if (flBooking == null)
             {
@@ -56,7 +56,7 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != flBooking.BookingId)
+            if (id != flBooking.BookId)
             {
                 return BadRequest();
             }
@@ -106,7 +106,7 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var flBooking = await _context.FlBooking.SingleOrDefaultAsync(m => m.BookingId == id);
+            var flBooking = await _context.FlBooking.SingleOrDefaultAsync(m => m.BookId == id);
             if (flBooking == null)
             {
                 return NotFound();
@@ -120,7 +120,7 @@ namespace BookingServer.Controllers
 
         private bool FlBookingExists(int id)
         {
-            return _context.FlBooking.Any(e => e.BookingId == id);
+            return _context.FlBooking.Any(e => e.BookId == id);
         }
     }
 }

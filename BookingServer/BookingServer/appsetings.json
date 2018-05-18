@@ -11,8 +11,8 @@
 
   "JWTSettings": {
     "SecretKey": "whoWhoAreYouStranger",
-    "Issuer": "Booking Server",
-    "Audience": "Booking Website"
+    "Issuer": "http://localhost:5000",
+    "Audience": "http://localhost:4200"
   },
 
   "Client": {
