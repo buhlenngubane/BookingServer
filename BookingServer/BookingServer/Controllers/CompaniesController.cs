@@ -5,45 +5,63 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BookingServer.Models.CarRentals;
+using BookingServer.Models.Flights;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.Flights
 {
     [Produces("application/json")]
-    [Route("api/Companies")]
+    [Route("api/Companies/[action]")]
     public class CompaniesController : Controller
     {
-        private readonly CarRentalDBContext _context;
+        private readonly FlightDBContext _context;
 
-        public CompaniesController(CarRentalDBContext context)
+        public CompaniesController(FlightDBContext context)
         {
             _context = context;
         }
 
         // GET: api/Companies
         [HttpGet]
-        public IEnumerable<Company> GetCompany()
+        public IEnumerable<Company> GetAll()
         {
             return _context.Company;
         }
 
         // GET: api/Companies/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetCompany([FromRoute] int id)
+        [HttpGet("{ids}")]
+        public async Task<IActionResult> GetCompany([FromRoute] string ids)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var company = await _context.Company.SingleOrDefaultAsync(m => m.CmpId == id);
+            List<Task<Company>> cmp = new List<Task<Company>>();
 
-            if (company == null)
+            if(!String.IsNullOrWhiteSpace(ids))
             {
-                return NotFound();
+                var list = ids?.Split(",").Select(int.Parse).ToArray();
+                try
+                {
+                    foreach (int lst in list)
+                    {
+                        cmp.Add(_context.Company.SingleAsync(m => m.Cid.Equals(lst)));
+                    }
+                    if (cmp == null)
+                    {
+                        return NotFound();
+                    }
+                    return Ok(cmp);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("Error in loop: " + ex.Message);
+                    return NotFound();
+                }
             }
 
-            return Ok(company);
+            return NotFound();
+            
         }
 
         // PUT: api/Companies/5
@@ -55,7 +73,7 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != company.CmpId)
+            if (id != company.Cid)
             {
                 return BadRequest();
             }
@@ -93,7 +111,7 @@ namespace BookingServer.Controllers
             _context.Company.Add(company);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCompany", new { id = company.CmpId }, company);
+            return CreatedAtAction("GetCompany", new { id = company.Cid }, company);
         }
 
         // DELETE: api/Companies/5
@@ -105,7 +123,7 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var company = await _context.Company.SingleOrDefaultAsync(m => m.CmpId == id);
+            var company = await _context.Company.SingleOrDefaultAsync(m => m.Cid == id);
             if (company == null)
             {
                 return NotFound();
@@ -119,7 +137,7 @@ namespace BookingServer.Controllers
 
         private bool CompanyExists(int id)
         {
-            return _context.Company.Any(e => e.CmpId == id);
+            return _context.Company.Any(e => e.Cid == id);
         }
     }
 }

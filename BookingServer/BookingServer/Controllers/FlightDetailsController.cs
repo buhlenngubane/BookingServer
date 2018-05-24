@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Flights;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.Flights
 {
     [Produces("application/json")]
-    [Route("api/FlightDetails/[action]")]
+    [Route("api/Flights/FlightDetails/[action]")]
     public class FlightDetailsController : Controller
     {
         private readonly FlightDBContext _context;
@@ -30,25 +30,28 @@ namespace BookingServer.Controllers
 
         // GET: api/FlightDetails/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetFlightDetail([FromRoute] int id)
+        public async Task<IActionResult> GetDetail([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var flightDetail = await _context.FlightDetail.SingleOrDefaultAsync(m => m.FdetailId == id);
+            var flightDetail = _context.FlightDetail.Where(m => m.DestId.Equals(id));
+
+
+            //var Pics=_context.Company.Where()
 
             if (flightDetail == null)
             {
                 return NotFound();
             }
 
-            return Ok(flightDetail);
+            return Ok(await flightDetail.ToListAsync());
         }
 
         // PUT: api/FlightDetails/5
-        [HttpPut("{id}"), Authorize(Policy = "Administrator")]
+        [HttpPut("{id}"),Authorize(Policy="Administrator")]
         public async Task<IActionResult> PutFlightDetail([FromRoute] int id, [FromBody] FlightDetail flightDetail)
         {
             if (!ModelState.IsValid)
@@ -56,7 +59,7 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != flightDetail.FdetailId)
+            if (id != flightDetail.DetailId)
             {
                 return BadRequest();
             }
@@ -94,7 +97,7 @@ namespace BookingServer.Controllers
             _context.FlightDetail.Add(flightDetail);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetFlightDetail", new { id = flightDetail.FdetailId }, flightDetail);
+            return CreatedAtAction("GetFlightDetail", new { id = flightDetail.DetailId }, flightDetail);
         }
 
         // DELETE: api/FlightDetails/5
@@ -106,7 +109,7 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var flightDetail = await _context.FlightDetail.SingleOrDefaultAsync(m => m.FdetailId == id);
+            var flightDetail = await _context.FlightDetail.SingleOrDefaultAsync(m => m.DetailId == id);
             if (flightDetail == null)
             {
                 return NotFound();
@@ -120,7 +123,7 @@ namespace BookingServer.Controllers
 
         private bool FlightDetailExists(int id)
         {
-            return _context.FlightDetail.Any(e => e.FdetailId == id);
+            return _context.FlightDetail.Any(e => e.DetailId == id);
         }
     }
 }

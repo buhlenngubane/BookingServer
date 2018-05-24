@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Flights;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.Flights
 {
     [Produces("application/json")]
-    [Route("api/FlBookings/[action]"), Authorize]
+    [Route("api/Flights/FlBookings/[action]"), Authorize]
     public class FlBookingsController : Controller
     {
         private readonly FlightDBContext _context;
@@ -37,7 +37,7 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var flBooking = await _context.FlBooking.SingleOrDefaultAsync(m => m.BookingId == id);
+            var flBooking = await _context.FlBooking.SingleOrDefaultAsync(m => m.UserId.Equals(id));
 
             if (flBooking == null)
             {
@@ -48,7 +48,7 @@ namespace BookingServer.Controllers
         }
 
         // PUT: api/FlBookings/5
-        [HttpPut("{id}")]
+        [HttpPut("{id}"),Authorize]
         public async Task<IActionResult> PutFlBooking([FromRoute] int id, [FromBody] FlBooking flBooking)
         {
             if (!ModelState.IsValid)

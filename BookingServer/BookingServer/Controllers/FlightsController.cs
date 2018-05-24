@@ -6,9 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Flights;
-using Microsoft.AspNetCore.Authorization;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.Flights
 {
     [Produces("application/json")]
     [Route("api/Flights/[action]")]
@@ -23,32 +22,32 @@ namespace BookingServer.Controllers
 
         // GET: api/Flights
         [HttpGet]
-        public IEnumerable<Flight> GetAll()
+        public IEnumerable<Flight> GetFlight()
         {
             return _context.Flight;
         }
 
         // GET: api/Flights/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetFlight([FromRoute] int id)
+        [HttpGet("{searchString}")]
+        public async Task<IActionResult> Search([FromRoute] string searchString)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var flight = await _context.Flight.SingleOrDefaultAsync(m => m.FlightId == id);
-
-            if (flight == null)
+            if(!String.IsNullOrWhiteSpace(searchString))
             {
-                return NotFound();
+                var flight = _context.Flight.Where(m => m.Locale.Contains(searchString));
+
+                return Ok(await flight.ToListAsync());
             }
 
-            return Ok(flight);
+            return Ok();
         }
 
         // PUT: api/Flights/5
-        [HttpPut("{id}"), Authorize(Policy = "Administrator")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> PutFlight([FromRoute] int id, [FromBody] Flight flight)
         {
             if (!ModelState.IsValid)
@@ -83,7 +82,7 @@ namespace BookingServer.Controllers
         }
 
         // POST: api/Flights
-        [HttpPost, Authorize(Policy = "Administrator")]
+        [HttpPost]
         public async Task<IActionResult> PostFlight([FromBody] Flight flight)
         {
             if (!ModelState.IsValid)
@@ -92,13 +91,58 @@ namespace BookingServer.Controllers
             }
 
             _context.Flight.Add(flight);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (FlightExists(flight.FlightId))
+                {
+                    return new StatusCodeResult(StatusCodes.Status409Conflict);
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
             return CreatedAtAction("GetFlight", new { id = flight.FlightId }, flight);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> PostFlights([FromBody] Flight[] flights)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _context.Flight.AddRange(flights);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Error adding range: " + ex.Message);
+                return BadRequest();
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Error saving changes: " + ex.Message);
+                return BadRequest();
+            }
+
+            return Created("Booking Sever", flights);
+        }
+
         // DELETE: api/Flights/5
-        [HttpDelete("{id}"), Authorize(Policy = "Administrator")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFlight([FromRoute] int id)
         {
             if (!ModelState.IsValid)
