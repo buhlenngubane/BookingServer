@@ -7,14 +7,15 @@ namespace BookingServer.Models.Flights
     {
         public Flight()
         {
-            FlightDetail = new HashSet<FlightDetail>();
+            Destination = new HashSet<Destination>();
+            FlBooking = new HashSet<FlBooking>();
         }
 
         public int FlightId { get; set; }
         public string Locale { get; set; }
-        public string Destination { get; set; }
         public int AvFlights { get; set; }
 
-        public ICollection<FlightDetail> FlightDetail { get; set; }
+        public ICollection<Destination> Destination { get; set; }
+        public ICollection<FlBooking> FlBooking { get; set; }
     }
 }
