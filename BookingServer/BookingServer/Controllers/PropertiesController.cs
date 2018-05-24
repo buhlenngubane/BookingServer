@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Accommodations;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.Accommodations
 {
     [Produces("application/json")]
     [Route("api/Properties/[action]")]
@@ -27,27 +27,23 @@ namespace BookingServer.Controllers
             return _context.Property;
         }
 
+        
+
         // GET: api/Properties/5
-        [HttpGet("{AccId}")]
-        public async Task<IActionResult> GetProperties([FromRoute] int AccId)
+        [HttpGet("{accId}")]
+        public async Task<IActionResult> GetProperties([FromRoute] int accId)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var @property =  _context.Property.Where(s => s.AccId.Equals(accId));
 
-            var @property = from m in _context.Accommodation
-                            select m;
-
-            @property = @property.Where(m => m.AccId.Equals(AccId));
+            //@property = @property.Where(m => m.AccId.Equals(AccId));
             //await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
 
             if (@property == null)
             {
                 return NotFound();
             }
-
-            return View(await @property.ToListAsync());
+            return Ok(await @property.ToListAsync());
+            //return await @property.ToListAsync();
         }
 
         [HttpGet("{AccId}&{PropName}")]
@@ -57,14 +53,8 @@ namespace BookingServer.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            /*var @property = 
-                await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId) && 
-                m.PropName.Contains(PropName));*/
-            var @property = from m in _context.Property
-                            select m;
-
-            @property = @property.Where(m => m.AccId.Equals(AccId) &&
+            
+            var @property = _context.Property.Where(m => m.AccId.Equals(AccId) &&
                 m.PropName.Contains(PropName));
             //await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
 
@@ -73,7 +63,7 @@ namespace BookingServer.Controllers
                 return NotFound();
             }
 
-            return View(await @property.ToListAsync());
+            return Ok(await @property.ToListAsync());
         }
 
         // PUT: api/Properties/5
@@ -128,6 +118,29 @@ namespace BookingServer.Controllers
             }
 
             return CreatedAtAction("GetProperty", new { id = @property.PropId }, @property);
+        }
+
+        [HttpPost, Authorize(Policy = "Administrator")]
+        public async Task<IActionResult> PostProperties([FromBody] Property[] properties)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _context.Property.AddRange(properties);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex);
+                return NoContent();
+            }
+            //foreach (Property prop in properties)
+            return Ok(properties);//, 
+                //new { id = properties..PropId }, properties);
         }
 
         // DELETE: api/Properties/5

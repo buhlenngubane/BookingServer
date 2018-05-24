@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Accommodations;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.Accommodations
 {
     [Produces("application/json")]
     [Route("api/Accommodations/[action]")]
@@ -27,6 +27,26 @@ namespace BookingServer.Controllers
         {
             return _context.Accommodation;
         }
+
+        [HttpGet("{searchString?}")]
+        public async Task<IActionResult> Search([FromRoute] string searchString)
+        {
+            
+            //var Default = new Accommodation();
+            Console.WriteLine("Checking if Null");
+            if (!String.IsNullOrWhiteSpace(searchString))
+            {
+                
+               var locations = _context.Accommodation.Where(s => s.Country.Contains(searchString));
+                return Ok(await locations.ToListAsync());
+
+            }
+
+            return Ok();
+            //else
+                
+        }
+        
 
         [HttpGet("{Country}")]
         public async Task<IActionResult> SpecificCountry([FromRoute] string Country)
