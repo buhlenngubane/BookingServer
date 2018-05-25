@@ -5,62 +5,62 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BookingServer.Models.CarRentals;
+using BookingServer.Models.AirTaxis;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.AirTaxis
 {
     [Produces("application/json")]
-    [Route("api/Companies/[action]")]
-    public class CompaniesController : Controller
+    [Route("api/AirTaxis/Taxis/[action]")]
+    public class TaxisController : Controller
     {
-        private readonly CarRentalDBContext _context;
+        private readonly AirTaxiDBContext _context;
 
-        public CompaniesController(CarRentalDBContext context)
+        public TaxisController(AirTaxiDBContext context)
         {
             _context = context;
         }
 
-        // GET: api/Companies
+        // GET: api/Taxis
         [HttpGet]
-        public IEnumerable<Company> GetAll()
+        public IEnumerable<Taxi> GetTaxi()
         {
-            return _context.Company;
+            return _context.Taxi;
         }
 
-        // GET: api/Companies/5
+        // GET: api/Taxis/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetCompany([FromRoute] int id)
+        public async Task<IActionResult> GetTaxi([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var company = await _context.Company.SingleOrDefaultAsync(m => m.CmpId == id);
+            var taxi = await _context.Taxi.SingleOrDefaultAsync(m => m.TaxiId == id);
 
-            if (company == null)
+            if (taxi == null)
             {
                 return NotFound();
             }
 
-            return Ok(company);
+            return Ok(taxi);
         }
 
-        // PUT: api/Companies/5
+        // PUT: api/Taxis/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCompany([FromRoute] int id, [FromBody] Company company)
+        public async Task<IActionResult> PutTaxi([FromRoute] int id, [FromBody] Taxi taxi)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != company.CmpId)
+            if (id != taxi.TaxiId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(company).State = EntityState.Modified;
+            _context.Entry(taxi).State = EntityState.Modified;
 
             try
             {
@@ -68,7 +68,7 @@ namespace BookingServer.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CompanyExists(id))
+                if (!TaxiExists(id))
                 {
                     return NotFound();
                 }
@@ -81,45 +81,45 @@ namespace BookingServer.Controllers
             return NoContent();
         }
 
-        // POST: api/Companies
+        // POST: api/Taxis
         [HttpPost]
-        public async Task<IActionResult> PostCompany([FromBody] Company company)
+        public async Task<IActionResult> PostTaxi([FromBody] Taxi taxi)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Company.Add(company);
+            _context.Taxi.Add(taxi);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCompany", new { id = company.CmpId }, company);
+            return CreatedAtAction("GetTaxi", new { id = taxi.TaxiId }, taxi);
         }
 
-        // DELETE: api/Companies/5
+        // DELETE: api/Taxis/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCompany([FromRoute] int id)
+        public async Task<IActionResult> DeleteTaxi([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var company = await _context.Company.SingleOrDefaultAsync(m => m.CmpId == id);
-            if (company == null)
+            var taxi = await _context.Taxi.SingleOrDefaultAsync(m => m.TaxiId == id);
+            if (taxi == null)
             {
                 return NotFound();
             }
 
-            _context.Company.Remove(company);
+            _context.Taxi.Remove(taxi);
             await _context.SaveChangesAsync();
 
-            return Ok(company);
+            return Ok(taxi);
         }
 
-        private bool CompanyExists(int id)
+        private bool TaxiExists(int id)
         {
-            return _context.Company.Any(e => e.CmpId == id);
+            return _context.Taxi.Any(e => e.TaxiId == id);
         }
     }
 }

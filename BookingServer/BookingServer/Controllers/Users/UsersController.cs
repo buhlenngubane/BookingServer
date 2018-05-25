@@ -8,7 +8,7 @@ using BookingServer.Models.Users;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.Users
 {
     [Produces("application/json")]
     [Route("api/Users/[action]")]

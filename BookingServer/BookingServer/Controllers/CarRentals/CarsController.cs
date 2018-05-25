@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.CarRentals;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.CarRentals
 {
     [Produces("application/json")]
-    [Route("api/Cars/[action]")]
+    [Route("api/CarRentals/Cars/[action]")]
     public class CarsController : Controller
     {
         private readonly CarRentalDBContext _context;
@@ -22,7 +22,7 @@ namespace BookingServer.Controllers
 
         // GET: api/Cars
         [HttpGet]
-        public IEnumerable<Car> GetAll()
+        public IEnumerable<Car> GetCar()
         {
             return _context.Car;
         }

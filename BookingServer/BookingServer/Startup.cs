@@ -9,6 +9,7 @@ using BookingServer.Models.AirTaxis;
 using BookingServer.Models.CarRentals;
 using BookingServer.Models.Flights;
 using BookingServer.Models.Users;
+using BookingServer.Services;
 using BookingServer.Web.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -82,6 +83,12 @@ namespace BookingServer
                 }
              );
 
+            services.AddTransient<TokenManagerMiddleware>();
+
+            services.AddTransient<ITokenManager, TokenManager>();
+
+            services.AddDistributedRedisCache(r => { r.Configuration = Configuration["redis:connectionString"]; });
+
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("Administrator",
@@ -148,6 +155,8 @@ namespace BookingServer
             });
 
             app.UseAuthentication();
+
+            app.UseMiddleware<TokenManagerMiddleware>();
 
             app.UseCors("ClientDomain");
 

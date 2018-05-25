@@ -7,60 +7,60 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Flights;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.Flights
 {
     [Produces("application/json")]
-    [Route("api/AirFlights/[action]")]
-    public class AirFlightsController : Controller
+    [Route("api/Flights/FlightDetails/[action]")]
+    public class FlightDetailsController : Controller
     {
         private readonly FlightDBContext _context;
 
-        public AirFlightsController(FlightDBContext context)
+        public FlightDetailsController(FlightDBContext context)
         {
             _context = context;
         }
 
-        // GET: api/AirFlights
+        // GET: api/FlightDetails
         [HttpGet]
-        public IEnumerable<AirFlight> GetAirFlight()
+        public IEnumerable<FlightDetail> GetFlightDetail()
         {
-            return _context.AirFlight;
+            return _context.FlightDetail;
         }
 
-        // GET: api/AirFlights/5
+        // GET: api/FlightDetails/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAirFlight([FromRoute] int id)
+        public async Task<IActionResult> GetFlightDetail([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var airFlight = await _context.AirFlight.SingleOrDefaultAsync(m => m.FlightId == id);
+            var flightDetail = _context.FlightDetail.Where(m => m.DestId.Equals(id));
 
-            if (airFlight == null)
+            if (flightDetail == null)
             {
                 return NotFound();
             }
 
-            return Ok(airFlight);
+            return Ok(await flightDetail.ToListAsync());
         }
 
-        // PUT: api/AirFlights/5
+        // PUT: api/FlightDetails/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAirFlight([FromRoute] int id, [FromBody] AirFlight airFlight)
+        public async Task<IActionResult> PutFlightDetail([FromRoute] int id, [FromBody] FlightDetail flightDetail)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != airFlight.FlightId)
+            if (id != flightDetail.DetailId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(airFlight).State = EntityState.Modified;
+            _context.Entry(flightDetail).State = EntityState.Modified;
 
             try
             {
@@ -68,7 +68,7 @@ namespace BookingServer.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AirFlightExists(id))
+                if (!FlightDetailExists(id))
                 {
                     return NotFound();
                 }
@@ -81,45 +81,45 @@ namespace BookingServer.Controllers
             return NoContent();
         }
 
-        // POST: api/AirFlights
+        // POST: api/FlightDetails
         [HttpPost]
-        public async Task<IActionResult> PostAirFlight([FromBody] AirFlight airFlight)
+        public async Task<IActionResult> PostFlightDetail([FromBody] FlightDetail flightDetail)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.AirFlight.Add(airFlight);
+            _context.FlightDetail.Add(flightDetail);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAirFlight", new { id = airFlight.FlightId }, airFlight);
+            return CreatedAtAction("GetFlightDetail", new { id = flightDetail.DetailId }, flightDetail);
         }
 
-        // DELETE: api/AirFlights/5
+        // DELETE: api/FlightDetails/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAirFlight([FromRoute] int id)
+        public async Task<IActionResult> DeleteFlightDetail([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var airFlight = await _context.AirFlight.SingleOrDefaultAsync(m => m.FlightId == id);
-            if (airFlight == null)
+            var flightDetail = await _context.FlightDetail.SingleOrDefaultAsync(m => m.DetailId == id);
+            if (flightDetail == null)
             {
                 return NotFound();
             }
 
-            _context.AirFlight.Remove(airFlight);
+            _context.FlightDetail.Remove(flightDetail);
             await _context.SaveChangesAsync();
 
-            return Ok(airFlight);
+            return Ok(flightDetail);
         }
 
-        private bool AirFlightExists(int id)
+        private bool FlightDetailExists(int id)
         {
-            return _context.AirFlight.Any(e => e.FlightId == id);
+            return _context.FlightDetail.Any(e => e.DetailId == id);
         }
     }
 }

@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.Service
 {
     [Produces("application/json")]
     [Route("api/Token")]
@@ -97,7 +97,7 @@ namespace BookingServer.Controllers
 
                 var token = new JwtSecurityToken(_options.Issuer,
                   _options.Audience,claims,
-                  expires: DateTime.Now.AddMinutes(15),
+                  expires: DateTime.Now.AddMinutes(_options.ExpiryMinutes),
                   signingCredentials: creds);
 
                 return new JwtSecurityTokenHandler().WriteToken(token);

@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Flights;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.Flights
 {
     [Produces("application/json")]
-    [Route("api/FlBookings/[action]"), Authorize]
+    [Route("api/Flights/FlBookings/[action]"), Authorize]
     public class FlBookingsController : Controller
     {
         private readonly FlightDBContext _context;
@@ -37,7 +37,7 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var flBooking = await _context.FlBooking.SingleOrDefaultAsync(m => m.BookId == id);
+            var flBooking = await _context.FlBooking.SingleOrDefaultAsync(m => m.BookingId == id);
 
             if (flBooking == null)
             {
@@ -56,7 +56,7 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != flBooking.BookId)
+            if (id != flBooking.BookingId)
             {
                 return BadRequest();
             }
@@ -106,7 +106,7 @@ namespace BookingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var flBooking = await _context.FlBooking.SingleOrDefaultAsync(m => m.BookId == id);
+            var flBooking = await _context.FlBooking.SingleOrDefaultAsync(m => m.BookingId == id);
             if (flBooking == null)
             {
                 return NotFound();
@@ -120,7 +120,7 @@ namespace BookingServer.Controllers
 
         private bool FlBookingExists(int id)
         {
-            return _context.FlBooking.Any(e => e.BookId == id);
+            return _context.FlBooking.Any(e => e.BookingId == id);
         }
     }
 }

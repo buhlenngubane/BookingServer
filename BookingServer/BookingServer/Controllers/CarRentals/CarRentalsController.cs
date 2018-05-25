@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.CarRentals;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.CarRentals
 {
     [Produces("application/json")]
     [Route("api/CarRentals/[action]")]
@@ -22,28 +22,28 @@ namespace BookingServer.Controllers
 
         // GET: api/CarRentals
         [HttpGet]
-        public IEnumerable<CarRental> GetAll()
+        public IEnumerable<CarRental> GetCarRental()
         {
             return _context.CarRental;
         }
 
         // GET: api/CarRentals/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetCarRental([FromRoute] int id)
+        [HttpGet("{searchString?}")]
+        public async Task<IActionResult> GetCarRental([FromRoute] string searchString)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var carRental = await _context.CarRental.SingleOrDefaultAsync(m => m.CrentId == id);
-
-            if (carRental == null)
+            if (!String.IsNullOrWhiteSpace(searchString))
             {
-                return NotFound();
+                var carRental = _context.CarRental.Where(m => m.Location.Contains(searchString));
+
+                return Ok(await carRental.ToListAsync());
             }
 
-            return Ok(carRental);
+            return Ok();
         }
 
         // PUT: api/CarRentals/5

@@ -10,8 +10,5 @@ namespace BookingServer.Models.AirTaxis
         public string Name { get; set; }
         public string Type { get; set; }
         public int Price { get; set; }
-        public string PicDirectory { get; set; }
-
-        public AirTaxi Air { get; set; }
     }
 }

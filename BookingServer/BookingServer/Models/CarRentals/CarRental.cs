@@ -8,15 +8,15 @@ namespace BookingServer.Models.CarRentals
         public CarRental()
         {
             CarBooking = new HashSet<CarBooking>();
-            Company = new HashSet<Company>();
+            Cccompany = new HashSet<Cccompany>();
         }
 
         public int CrentId { get; set; }
         public string Location { get; set; }
-        public string PickUp { get; set; }
-        public string DropOff { get; set; }
+        public string PhysicalAddress { get; set; }
+        public int NumOfSuppliers { get; set; }
 
         public ICollection<CarBooking> CarBooking { get; set; }
-        public ICollection<Company> Company { get; set; }
+        public ICollection<Cccompany> Cccompany { get; set; }
     }
 }

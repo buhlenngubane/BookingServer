@@ -8,8 +8,9 @@ namespace BookingServer.Models.CarRentals
         public int BookingId { get; set; }
         public int UserId { get; set; }
         public int CrentId { get; set; }
+        public DateTime BookDate { get; set; }
+        public int ReturnDate { get; set; }
         public string PayType { get; set; }
-        public bool PayStatus { get; set; }
         public int Total { get; set; }
 
         public CarRental Crent { get; set; }

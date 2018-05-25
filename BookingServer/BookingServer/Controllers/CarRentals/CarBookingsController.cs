@@ -6,12 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.CarRentals;
-using Microsoft.AspNetCore.Authorization;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.CarRentals
 {
     [Produces("application/json")]
-    [Route("api/CarBookings/[action]"), Authorize]
+    [Route("api/CarRentals/CarBookings/[action]")]
     public class CarBookingsController : Controller
     {
         private readonly CarRentalDBContext _context;
@@ -23,7 +22,7 @@ namespace BookingServer.Controllers
 
         // GET: api/CarBookings
         [HttpGet]
-        public IEnumerable<CarBooking> GetAll()
+        public IEnumerable<CarBooking> GetCarBooking()
         {
             return _context.CarBooking;
         }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Accommodations;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.Accommodations
 {
     [Produces("application/json")]
     [Route("api/Accommodations/[action]")]

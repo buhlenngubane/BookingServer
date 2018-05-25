@@ -6,80 +6,110 @@ namespace BookingServer.Models.Flights
 {
     public partial class FlightDBContext : DbContext
     {
-        public virtual DbSet<AirFlight> AirFlight { get; set; }
-        public virtual DbSet<Detail> Detail { get; set; }
+        public virtual DbSet<Destination> Destination { get; set; }
         public virtual DbSet<FlBooking> FlBooking { get; set; }
+        public virtual DbSet<FlCompany> FlCompany { get; set; }
+        public virtual DbSet<Flight> Flight { get; set; }
+        public virtual DbSet<FlightDetail> FlightDetail { get; set; }
+
+        public FlightDBContext(DbContextOptions<FlightDBContext> options)
+            : base(options)
+        {
+            Database.EnsureCreated();
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer(@"Data Source=S11;Initial Catalog=FlightDB;Integrated Security=True;");
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<AirFlight>(entity =>
+            modelBuilder.Entity<Destination>(entity =>
             {
-                entity.HasKey(e => e.FlightId);
+                entity.HasKey(e => e.DestId);
 
-                entity.Property(e => e.Destination)
+                entity.Property(e => e.Destination1)
                     .IsRequired()
-                    .HasMaxLength(50)
+                    .HasColumnName("Destination")
                     .IsUnicode(false);
+
+                entity.HasOne(d => d.Flight)
+                    .WithMany(p => p.Destination)
+                    .HasForeignKey(d => d.FlightId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Destination_Flight");
+            });
+
+            modelBuilder.Entity<FlBooking>(entity =>
+            {
+                entity.HasKey(e => e.BookingId);
+
+                entity.Property(e => e.BookingId).ValueGeneratedNever();
+
+                entity.Property(e => e.BookDate).HasColumnType("date");
 
                 entity.Property(e => e.FlightType)
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Locale)
+                entity.HasOne(d => d.Flight)
+                    .WithMany(p => p.FlBooking)
+                    .HasForeignKey(d => d.FlightId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_FlBooking_Flight");
+            });
+
+            modelBuilder.Entity<FlCompany>(entity =>
+            {
+                entity.HasKey(e => e.Cid);
+
+                entity.Property(e => e.Cid).HasColumnName("CId");
+
+                entity.Property(e => e.CompanyName)
                     .IsRequired()
                     .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Picture).IsRequired();
+            });
+
+            modelBuilder.Entity<Flight>(entity =>
+            {
+                entity.Property(e => e.Locale)
+                    .IsRequired()
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<Detail>(entity =>
+            modelBuilder.Entity<FlightDetail>(entity =>
             {
-                entity.HasKey(e => e.FdetailId);
+                entity.HasKey(e => e.DetailId);
 
-                entity.Property(e => e.FdetailId).HasColumnName("FDetailId");
+                entity.Property(e => e.Cid).HasColumnName("CId");
 
-                entity.Property(e => e.Company)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Departure).HasColumnType("date");
+                entity.Property(e => e.Departure).HasColumnType("datetime");
 
                 entity.Property(e => e.Path)
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Picture).IsRequired();
+                entity.Property(e => e.ReturnTrip).HasColumnType("datetime");
 
-                entity.Property(e => e.ReturnTrip).HasColumnType("date");
-
-                entity.HasOne(d => d.Flight)
-                    .WithMany(p => p.Detail)
-                    .HasForeignKey(d => d.FlightId)
+                entity.HasOne(d => d.C)
+                    .WithMany(p => p.FlightDetail)
+                    .HasForeignKey(d => d.Cid)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Detail_AirFlight1");
-            });
+                    .HasConstraintName("FK_FlightDetail_Company");
 
-            modelBuilder.Entity<FlBooking>(entity =>
-            {
-                entity.HasKey(e => e.BookId);
-
-                entity.Property(e => e.BookDate).HasColumnType("date");
-
-                entity.Property(e => e.PayType)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
+                entity.HasOne(d => d.Dest)
+                    .WithMany(p => p.FlightDetail)
+                    .HasForeignKey(d => d.DestId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_FlightDetail_Destination");
             });
         }
     }

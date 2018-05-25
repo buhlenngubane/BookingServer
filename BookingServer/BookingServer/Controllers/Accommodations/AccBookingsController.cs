@@ -8,10 +8,10 @@ using BookingServer.Models.Accommodations;
 using BookingServer.Models.Users;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BookingServer.Controllers
+namespace BookingServer.Controllers.Accommodations
 {
     [Produces("application/json")]
-    [Route("api/AccBookings/[action]"), Authorize]
+    [Route("api/Accommodations/AccBookings/[action]"), Authorize]
     public class AccBookingsController : Controller
     {
         private readonly AccommodationDBContext _context;
