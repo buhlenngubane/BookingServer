@@ -22,9 +22,9 @@ namespace BookingServer.Controllers.Flights
 
         // GET: api/Flights
         [HttpGet]
-        public IEnumerable<Flight> GetFlight()
+        public IEnumerable<Flight> GetAll()
         {
-            return _context.Flight;
+            return _context.Flight.Include(s=>s.Destination);
         }
 
         // GET: api/Flights/5

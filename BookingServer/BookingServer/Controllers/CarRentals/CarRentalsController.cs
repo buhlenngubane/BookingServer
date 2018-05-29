@@ -27,9 +27,25 @@ namespace BookingServer.Controllers.CarRentals
             return _context.CarRental;
         }
 
+        /*[HttpGet("{search}")]
+        public async Task<IActionResult> Find([FromRoute] string search)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var carRental = await _context.Include(c=>c.Ccompany).SingleOrDefaultAsync(m => m.Location.Equals(search));
+
+            if (carRental.Equals(null))
+                return NotFound();
+
+            return Ok(carRental);
+        }*/
+
         // GET: api/CarRentals/5
         [HttpGet("{searchString?}")]
-        public async Task<IActionResult> GetCarRental([FromRoute] string searchString)
+        public async Task<IActionResult> Search([FromRoute] string searchString)
         {
             if (!ModelState.IsValid)
             {

@@ -10,7 +10,6 @@ namespace BookingServer.Models.CarRentals
         public virtual DbSet<CarBooking> CarBooking { get; set; }
         public virtual DbSet<CarRental> CarRental { get; set; }
         public virtual DbSet<CarType> CarType { get; set; }
-        public virtual DbSet<Cccompany> Cccompany { get; set; }
         public virtual DbSet<Ccompany> Ccompany { get; set; }
 
         public CarRentalDBContext(DbContextOptions<CarRentalDBContext> options)
@@ -102,36 +101,6 @@ namespace BookingServer.Models.CarRentals
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<Cccompany>(entity =>
-            {
-                entity.HasKey(e => e.CmpId);
-
-                entity.ToTable("CCCompany");
-
-                entity.Property(e => e.CompanyName)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.CrentId).HasColumnName("CRentId");
-
-                entity.Property(e => e.FuelPolicy)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Mileage)
-                    .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-                entity.HasOne(d => d.Crent)
-                    .WithMany(p => p.Cccompany)
-                    .HasForeignKey(d => d.CrentId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CCompany_CarRental");
-            });
-
             modelBuilder.Entity<Ccompany>(entity =>
             {
                 entity.HasKey(e => e.CmpId);
@@ -155,6 +124,12 @@ namespace BookingServer.Models.CarRentals
                     .IsUnicode(false);
 
                 entity.Property(e => e.Picture).IsRequired();
+
+                entity.HasOne(d => d.Crent)
+                    .WithMany(p => p.Ccompany)
+                    .HasForeignKey(d => d.CrentId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_CCompany_CarRental");
             });
         }
     }

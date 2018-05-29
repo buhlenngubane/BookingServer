@@ -27,23 +27,21 @@ namespace BookingServer.Controllers.Accommodations
             return _context.Property;
         }
 
-        
-
         // GET: api/Properties/5
         [HttpGet("{accId}")]
-        public async Task<IList<Property>> GetProperties([FromRoute] int accId)
+        public async Task<IActionResult> GetProperties([FromRoute] int accId)
         {
             var @property =  _context.Property.Where(s => s.AccId.Equals(accId));
 
             //@property = @property.Where(m => m.AccId.Equals(AccId));
             //await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
 
-            /*if (@property == null)
+            if (@property == null)
             {
                 return NotFound();
-            }*/
+            }
 
-            return await @property.ToListAsync();
+            return Ok(await @property.ToListAsync());
         }
 
         [HttpGet("{AccId}&{PropName}")]

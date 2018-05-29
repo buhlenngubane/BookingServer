@@ -7,12 +7,13 @@ namespace BookingServer.Models.AirTaxis
     public partial class AirTaxiDBContext : DbContext
     {
         public virtual DbSet<AirBooking> AirBooking { get; set; }
+        public virtual DbSet<AirDetail> AirDetail { get; set; }
         public virtual DbSet<AirTaxiDropOff> AirTaxiDropOff { get; set; }
         public virtual DbSet<AirTaxiPickUp> AirTaxiPickUp { get; set; }
         public virtual DbSet<Taxi> Taxi { get; set; }
 
         public AirTaxiDBContext(DbContextOptions<AirTaxiDBContext> options)
-            :base(options)
+                    : base(options)
         {
             Database.EnsureCreated();
         }
@@ -39,11 +40,30 @@ namespace BookingServer.Models.AirTaxis
 
                 entity.Property(e => e.ReturnJourney).HasColumnType("datetime");
 
-                entity.HasOne(d => d.DropOff)
+                entity.HasOne(d => d.PickUp)
                     .WithMany(p => p.AirBooking)
+                    .HasForeignKey(d => d.PickUpId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_AirBooking_AirTaxiPickUp");
+            });
+
+            modelBuilder.Entity<AirDetail>(entity =>
+            {
+                entity.Property(e => e.DriverPolicy)
+                    .IsRequired()
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.DropOff)
+                    .WithMany(p => p.AirDetail)
                     .HasForeignKey(d => d.DropOffId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_AirBooking_TaxiDropOff");
+                    .HasConstraintName("FK_AirDetail_AirTaxiDropOff");
+
+                entity.HasOne(d => d.Taxi)
+                    .WithMany(p => p.AirDetail)
+                    .HasForeignKey(d => d.TaxiId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_AirDetail_Taxi");
             });
 
             modelBuilder.Entity<AirTaxiDropOff>(entity =>
@@ -52,14 +72,13 @@ namespace BookingServer.Models.AirTaxis
 
                 entity.Property(e => e.DropOff)
                     .IsRequired()
-                    .HasMaxLength(50)
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.PickUp)
                     .WithMany(p => p.AirTaxiDropOff)
                     .HasForeignKey(d => d.PickUpId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_TaxiDropOff_AirTaxiPickUp");
+                    .HasConstraintName("FK_AirTaxiDropOff_AirTaxiPickUp");
             });
 
             modelBuilder.Entity<AirTaxiPickUp>(entity =>
@@ -68,20 +87,21 @@ namespace BookingServer.Models.AirTaxis
 
                 entity.Property(e => e.PickUp)
                     .IsRequired()
-                    .HasMaxLength(50)
                     .IsUnicode(false);
             });
 
             modelBuilder.Entity<Taxi>(entity =>
             {
+                entity.Property(e => e.DriverPolicy)
+                    .IsRequired()
+                    .IsUnicode(false);
+
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasMaxLength(50)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Type)
                     .IsRequired()
-                    .HasMaxLength(50)
                     .IsUnicode(false);
             });
         }

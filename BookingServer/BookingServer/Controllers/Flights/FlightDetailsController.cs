@@ -22,7 +22,7 @@ namespace BookingServer.Controllers.Flights
 
         // GET: api/FlightDetails
         [HttpGet]
-        public IEnumerable<FlightDetail> GetFlightDetail()
+        public IEnumerable<FlightDetail> GetAll()
         {
             return _context.FlightDetail;
         }
@@ -36,7 +36,7 @@ namespace BookingServer.Controllers.Flights
                 return BadRequest(ModelState);
             }
 
-            var flightDetail = _context.FlightDetail.Where(m => m.DestId.Equals(id));
+            var flightDetail = _context.FlightDetail.Include(c=>c.C).Where(m => m.DestId.Equals(id));
 
             if (flightDetail == null)
             {

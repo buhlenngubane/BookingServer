@@ -7,13 +7,13 @@ namespace BookingServer.Models.AirTaxis
     {
         public int BookingId { get; set; }
         public int UserId { get; set; }
-        public int DropOffId { get; set; }
+        public int PickUpId { get; set; }
         public DateTime BookDate { get; set; }
         public DateTime? ReturnJourney { get; set; }
         public string PayType { get; set; }
         public bool PayStatus { get; set; }
         public int Total { get; set; }
 
-        public AirTaxiDropOff DropOff { get; set; }
+        public AirTaxiPickUp PickUp { get; set; }
     }
 }

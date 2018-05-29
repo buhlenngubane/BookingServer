@@ -28,22 +28,22 @@ namespace BookingServer.Controllers.AirTaxis
         }
 
         // GET: api/AirTaxiPickUps/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetAirTaxiPickUp([FromRoute] int id)
+        [HttpGet("{searchString?}")]
+        public async Task<IActionResult> GetAirTaxiPickUp([FromRoute] string searchString)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var airTaxiPickUp = await _context.AirTaxiPickUp.SingleOrDefaultAsync(m => m.PickUpId == id);
-
-            if (airTaxiPickUp == null)
+            if (!String.IsNullOrWhiteSpace(searchString))
             {
-                return NotFound();
+                var airTaxiPickUp = _context.AirTaxiPickUp.Where(m => m.PickUp.Contains(searchString));
+
+                return Ok(await airTaxiPickUp.ToListAsync());
             }
 
-            return Ok(airTaxiPickUp);
+            return Ok();
         }
 
         // PUT: api/AirTaxiPickUps/5

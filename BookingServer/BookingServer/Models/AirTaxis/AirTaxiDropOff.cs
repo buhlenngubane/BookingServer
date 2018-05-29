@@ -7,7 +7,7 @@ namespace BookingServer.Models.AirTaxis
     {
         public AirTaxiDropOff()
         {
-            AirBooking = new HashSet<AirBooking>();
+            AirDetail = new HashSet<AirDetail>();
         }
 
         public int DropOffId { get; set; }
@@ -16,6 +16,6 @@ namespace BookingServer.Models.AirTaxis
         public int TaxiCount { get; set; }
 
         public AirTaxiPickUp PickUp { get; set; }
-        public ICollection<AirBooking> AirBooking { get; set; }
+        public ICollection<AirDetail> AirDetail { get; set; }
     }
 }

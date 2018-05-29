@@ -10,7 +10,7 @@ namespace BookingServer.Models.CarRentals
         public int CtypeId { get; set; }
         public int Price { get; set; }
 
-        public Cccompany Cmp { get; set; }
+        public Ccompany Cmp { get; set; }
         public CarType Ctype { get; set; }
     }
 }

@@ -129,7 +129,10 @@ namespace BookingServer
                 options.UseSqlServer(Configuration.GetConnectionString("AirTaxiDatabase"))
             );
 
-            services.AddMvc();
+            services.AddMvc()
+                .AddJsonOptions(
+                    options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+                );
 
             services.AddSwaggerGen(c =>
             {

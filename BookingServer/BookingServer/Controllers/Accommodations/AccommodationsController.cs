@@ -29,26 +29,24 @@ namespace BookingServer.Controllers.Accommodations
         }
 
         [HttpGet("{searchString?}")]
-        public IEnumerable<Accommodation> Search([FromRoute] string searchString)
+        public async Task<IActionResult> Search([FromRoute] string searchString)
         {
-            var locations = from l in _context.Accommodation
-                            select l;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var Default = new Accommodation();
             Console.WriteLine("Checking if Null");
-            if (!String.IsNullOrEmpty(searchString))
+            if (!String.IsNullOrWhiteSpace(searchString))
             {
-                try
-                {
-                    Console.WriteLine("Searching");
-                    locations = locations?.Where(s => s.Country.Contains(searchString));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error : " + ex);
-                }
+                var acc = _context.Accommodation.Where(m => m.Country.Contains(searchString) || 
+                m.Location.Contains(searchString));
+
+                return Ok(await acc.ToListAsync());
             }
             //if (!locations.Equals(null))
-                return locations.ToList();
+            return Ok();
             //else
                 
         }

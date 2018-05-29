@@ -36,14 +36,18 @@ namespace BookingServer.Controllers.CarRentals
                 return BadRequest(ModelState);
             }
 
-            var ccompany = await _context.Ccompany.SingleOrDefaultAsync(m => m.CmpId == id);
+            //List<IActionResult> carTypes = new List<IActionResult>();
+
+            //var all = _context.Ccompany.Include(c => c.Cmp).AsNoTracking();
+
+            var ccompany = _context.Ccompany.Where(m => m.CrentId.Equals(id));
 
             if (ccompany == null)
             {
                 return NotFound();
             }
 
-            return Ok(ccompany);
+            return Ok(await ccompany.ToListAsync());
         }
 
         // PUT: api/Ccompanies/5

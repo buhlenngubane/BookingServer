@@ -22,7 +22,7 @@ namespace BookingServer.Controllers.Flights
 
         // GET: api/Destinations
         [HttpGet]
-        public IEnumerable<Destination> GetDestination()
+        public IEnumerable<Destination> GetAll()
         {
             return _context.Destination;
         }

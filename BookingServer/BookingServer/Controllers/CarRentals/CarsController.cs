@@ -28,22 +28,27 @@ namespace BookingServer.Controllers.CarRentals
         }
 
         // GET: api/Cars/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetCar([FromRoute] int id)
+        [HttpGet("{search}")]
+        public async Task<IActionResult> GetDetails([FromRoute] string search)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            
+            var list=_context.Car.Include(c => c.Ctype)
+                .Include(c=>c.Cmp).AsNoTracking()
+                .Where(m => m.Cmp.Crent.Location.Equals(search)).OrderBy(s=>s.Price);
 
-            var car = await _context.Car.SingleOrDefaultAsync(m => m.CarId == id);
+            //list.Load();
+            
 
-            if (car == null)
+            if (list.Equals(null))
             {
                 return NotFound();
             }
 
-            return Ok(car);
+            return Ok(await list.ToListAsync());
         }
 
         // PUT: api/Cars/5
