@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BookingServer.Models.Accommodations;
@@ -18,6 +16,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -25,7 +24,8 @@ namespace BookingServer
 {
     public class Startup
     {
-        public static IConfiguration Configuration { get; set; }
+        private static IConfiguration Configuration { get; set; }
+
         public Startup()
         {
             var config = new ConfigurationBuilder()
@@ -83,9 +83,13 @@ namespace BookingServer
                 }
              );
 
+            services.AddLogging();
+
             services.AddTransient<TokenManagerMiddleware>();
 
             services.AddTransient<ITokenManager, TokenManager>();
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddDistributedRedisCache(r => { r.Configuration = Configuration["redis:connectionString"]; });
 
@@ -102,7 +106,8 @@ namespace BookingServer
                     options.AddPolicy("ClientDomain",
                         builder =>
                         {
-                            builder.WithOrigins(Configuration["Client:AngularSite"]).AllowAnyMethod().AllowAnyHeader();
+                            builder.WithOrigins(Configuration["Client:AngularSite"])
+                            .AllowAnyMethod().AllowAnyHeader().AllowCredentials();
                         });
                 }
             );
@@ -139,11 +144,16 @@ namespace BookingServer
                 c.SwaggerDoc("v1", new Info { Title = "Booking Server", Version = "v1" });
                 c.OperationFilter<AddAuthTokenHeaderParam>();
             });
+
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env
+            , ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddDebug().AddConsole();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -162,6 +172,11 @@ namespace BookingServer
             app.UseMiddleware<TokenManagerMiddleware>();
 
             app.UseCors("ClientDomain");
+
+            app.UseSignalR(route =>
+            {
+                route.MapHub<Booking_Notify>("/async");
+            });
 
             app.UseMvc(
                     routes=>
