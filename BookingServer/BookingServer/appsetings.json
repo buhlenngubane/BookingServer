@@ -1,10 +1,10 @@
 ﻿{
   "ConnectionStrings": {
-    "UserDatabase": "Data Source=S11;Initial Catalog=UserDB;Integrated Security=True;",
-    "AccommodationDatabase": "Data Source=S11;Initial Catalog=AccommodationDB;Integrated Security=True;",
-    "FlightDatabase": "Data Source=S11;Initial Catalog=FlightDB;Integrated Security=True;",
-    "CarRentalDatabase": "Data Source=S11;Initial Catalog=CarRentalDB;Integrated Security=True;",
-    "AirTaxiDatabase": "Data Source=S11;Initial Catalog=AirTaxiDB;Integrated Security=True;"
+    "UserDatabase": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=UserDB;Integrated Security=True;",
+    "AccommodationDatabase": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=AccommodationDB;Integrated Security=True;",
+    "FlightDatabase": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=FlightDB;Integrated Security=True;",
+    "CarRentalDatabase": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=CarRentalDB;Integrated Security=True;",
+    "AirTaxiDatabase": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=AirTaxiDB;Integrated Security=True;"
   },
 
   "Logging": "... log configuration",
