@@ -44,9 +44,12 @@ namespace BookingServer.Controllers.Users
 
             try
             {
-                if (user.Equals(null) || userp.Equals(null))
+                if (user==null || userp==null)
                 {
-                    return user.Equals(null) ? 
+                    if (user == null && userp == null)
+                        return NotFound("User not registered.");
+
+                    return user==null ? 
                         NotFound("Email not found") : NotFound("Password not found");
                 }
                 else if(!user.UserId.Equals(userp.UserId))

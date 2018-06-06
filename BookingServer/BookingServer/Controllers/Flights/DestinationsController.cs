@@ -29,7 +29,7 @@ namespace BookingServer.Controllers.Flights
 
         // GET: api/Destinations/5
         [HttpGet("{searchString?}")]
-        public async Task<IActionResult> GetDestination([FromRoute] string searchString)
+        public async Task<IActionResult> Search([FromRoute] string searchString)
         {
             if (!ModelState.IsValid)
             {

@@ -29,7 +29,7 @@ namespace BookingServer.Controllers.AirTaxis
 
         // GET: api/AirTaxiPickUps/5
         [HttpGet("{searchString?}")]
-        public async Task<IActionResult> GetAirTaxiPickUp([FromRoute] string searchString)
+        public async Task<IActionResult> Search([FromRoute] string searchString)
         {
             if (!ModelState.IsValid)
             {

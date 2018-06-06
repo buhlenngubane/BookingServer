@@ -28,6 +28,27 @@ namespace BookingServer.Controllers.Accommodations
             return _context.Accommodation;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAccomPropBook()
+        {
+            try
+            {
+                var AccomPropBook = from accomPropBook in _context.Accommodation
+                                    join detail in _context.Property.Include(s => s.AccBooking)
+                                    on accomPropBook.AccId equals detail.AccId
+                                    into Details
+                                    //from m in Details.DefaultIfEmpty()
+                                    select new { Details };
+
+                return Ok(await AccomPropBook.ToListAsync());
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.InnerException);
+                return BadRequest("Noooooooooo!!!!!!");
+            }
+        }
         [HttpGet("{searchString?}")]
         public async Task<IActionResult> Search([FromRoute] string searchString)
         {

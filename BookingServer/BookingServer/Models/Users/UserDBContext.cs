@@ -26,27 +26,19 @@ namespace BookingServer.Models.Users
             {
                 entity.Property(e => e.Email)
                     .IsRequired()
-                    .HasMaxLength(50)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasMaxLength(50)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Password)
                     .IsRequired()
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Phone)
-                    .IsRequired()
-                    .HasMaxLength(10)
+                    .HasMaxLength(110)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Surname)
                     .IsRequired()
-                    .HasMaxLength(50)
                     .IsUnicode(false);
             });
         }

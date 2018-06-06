@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using BookingServer.Models.Users;
+using BookingServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,23 +15,25 @@ using Microsoft.IdentityModel.Tokens;
 namespace BookingServer.Controllers.Service
 {
     [Produces("application/json")]
-    [Route("api/Token")]
+    [Route("api/Token/[action]")]
     public class TokenController : Controller
     {
         private readonly UserDBContext _context;
         private readonly JwtSettings _options;
+        private readonly ITokenManager _tokenManager;
 
         public TokenController(UserDBContext context,
-            IOptions<JwtSettings> optionsAccessor)
+            IOptions<JwtSettings> optionsAccessor, ITokenManager tokenManager)
         {
             _context = context;
             _options = optionsAccessor.Value;
+            _tokenManager = tokenManager;
         }
 
         [HttpGet(), Authorize]
         public async Task<IActionResult> SignIn()
         {
-            var user = await _context.User.SingleOrDefaultAsync(m => m.Email.Equals(User.Identity.Name));
+            var user = await _context.User.SingleOrDefaultAsync(m => m.UserId.Equals(int.Parse(User.Identity.Name)));
             //User sendUser = new User(user.Name,user.Email);
             user.Password = "";
             //var userName = User.Identity.Name;
@@ -49,9 +52,9 @@ namespace BookingServer.Controllers.Service
 
                 try
                 { 
-                    if (user.Equals(null) || userP.Equals(null))
+                    if (user == null || userP == null)
                     {
-                        return user.Equals(null) ? 
+                        return user == null ? 
                             NotFound("Email not found") : NotFound("Password not found");
                     }
                     else if (!user.UserId.Equals(userP.UserId))
@@ -70,7 +73,20 @@ namespace BookingServer.Controllers.Service
                 return response;
 
             }
-            return Error("Unknown error! ");
+            return Error("ModelState error!");
+        }
+
+        [HttpPost, Authorize]
+        public async Task<IActionResult> LogOut([FromBody] User user)
+        {
+            if(ModelState.IsValid)
+            {
+                await _tokenManager.DeactivateCurrentAsync();
+
+                return Ok("LoggedOut:)");
+            }
+
+            return Error("ModelState error! Not LoggedOut.");
         }
 
         private string BuildToken(User user)
@@ -82,17 +98,17 @@ namespace BookingServer.Controllers.Service
 
                 string role = "";
 
-                if (user.UserId.Equals(1))
+                Console.WriteLine(user.Admin);
+
+                if (user.Admin.Equals(true))
                     role = "Admin";
                 else
                     role = "Customer";
 
                 Claim[] claims = new[]
                 {
-                    new Claim(ClaimTypes.Name,user.Email),
-                    new Claim(ClaimTypes.GroupSid,user.UserId.ToString()),
+                    new Claim(ClaimTypes.Name,user.UserId.ToString()),
                     new Claim(ClaimTypes.Role, role)
-                    
                 };
 
                 var token = new JwtSecurityToken(_options.Issuer,

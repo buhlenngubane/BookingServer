@@ -13,7 +13,7 @@ namespace BookingServer.Models.AirTaxis
         public virtual DbSet<Taxi> Taxi { get; set; }
 
         public AirTaxiDBContext(DbContextOptions<AirTaxiDBContext> options)
-                    : base(options)
+                            : base(options)
         {
             Database.EnsureCreated();
         }
@@ -40,11 +40,11 @@ namespace BookingServer.Models.AirTaxis
 
                 entity.Property(e => e.ReturnJourney).HasColumnType("datetime");
 
-                entity.HasOne(d => d.PickUp)
+                entity.HasOne(d => d.AirDetail)
                     .WithMany(p => p.AirBooking)
-                    .HasForeignKey(d => d.PickUpId)
+                    .HasForeignKey(d => d.AirDetailId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_AirBooking_AirTaxiPickUp");
+                    .HasConstraintName("FK_AirBooking_AirDetail");
             });
 
             modelBuilder.Entity<AirDetail>(entity =>

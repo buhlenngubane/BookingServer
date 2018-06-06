@@ -13,7 +13,7 @@ namespace BookingServer.Models.CarRentals
         public virtual DbSet<Ccompany> Ccompany { get; set; }
 
         public CarRentalDBContext(DbContextOptions<CarRentalDBContext> options)
-            : base(options)
+                    : base(options)
         {
             Database.EnsureCreated();
         }
@@ -48,20 +48,20 @@ namespace BookingServer.Models.CarRentals
             {
                 entity.HasKey(e => e.BookingId);
 
-                entity.Property(e => e.BookDate).HasColumnType("date");
-
-                entity.Property(e => e.CrentId).HasColumnName("CRentId");
+                entity.Property(e => e.BookDate).HasColumnType("datetime");
 
                 entity.Property(e => e.PayType)
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.HasOne(d => d.Crent)
+                entity.Property(e => e.ReturnDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.Car)
                     .WithMany(p => p.CarBooking)
-                    .HasForeignKey(d => d.CrentId)
+                    .HasForeignKey(d => d.CarId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_CarBooking_CarRental");
+                    .HasConstraintName("FK_CarBooking_Car");
             });
 
             modelBuilder.Entity<CarRental>(entity =>

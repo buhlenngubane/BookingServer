@@ -7,7 +7,6 @@ namespace BookingServer.Models.Accommodations
     {
         public Accommodation()
         {
-            AccBooking = new HashSet<AccBooking>();
             Property = new HashSet<Property>();
         }
 
@@ -16,7 +15,6 @@ namespace BookingServer.Models.Accommodations
         public string Location { get; set; }
         public byte[] Picture { get; set; }
 
-        public ICollection<AccBooking> AccBooking { get; set; }
         public ICollection<Property> Property { get; set; }
     }
 }

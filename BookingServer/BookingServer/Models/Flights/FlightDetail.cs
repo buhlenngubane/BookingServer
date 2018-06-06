@@ -5,6 +5,11 @@ namespace BookingServer.Models.Flights
 {
     public partial class FlightDetail
     {
+        public FlightDetail()
+        {
+            FlBooking = new HashSet<FlBooking>();
+        }
+
         public int DetailId { get; set; }
         public int DestId { get; set; }
         public int Cid { get; set; }
@@ -15,5 +20,6 @@ namespace BookingServer.Models.Flights
 
         public FlCompany C { get; set; }
         public Destination Dest { get; set; }
+        public ICollection<FlBooking> FlBooking { get; set; }
     }
 }

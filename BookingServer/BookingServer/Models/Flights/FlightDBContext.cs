@@ -13,7 +13,7 @@ namespace BookingServer.Models.Flights
         public virtual DbSet<FlightDetail> FlightDetail { get; set; }
 
         public FlightDBContext(DbContextOptions<FlightDBContext> options)
-            : base(options)
+                            : base(options)
         {
             Database.EnsureCreated();
         }
@@ -56,11 +56,16 @@ namespace BookingServer.Models.Flights
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.HasOne(d => d.Flight)
+                entity.Property(e => e.PayType)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.Detail)
                     .WithMany(p => p.FlBooking)
-                    .HasForeignKey(d => d.FlightId)
+                    .HasForeignKey(d => d.DetailId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_FlBooking_Flight");
+                    .HasConstraintName("FK_FlBooking_FlightDetail");
             });
 
             modelBuilder.Entity<FlCompany>(entity =>

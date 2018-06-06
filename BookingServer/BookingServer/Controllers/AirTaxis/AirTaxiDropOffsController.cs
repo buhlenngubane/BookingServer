@@ -46,6 +46,24 @@ namespace BookingServer.Controllers.AirTaxis
             return Ok();
         }
 
+        [HttpGet("{id}&{searchString}")]
+        public async Task<IActionResult> SearchPickUp([FromRoute] string searchString, int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!String.IsNullOrWhiteSpace(searchString))
+            {
+                var airTaxiPickUp = _context.AirTaxiDropOff.Where(m => m.DropOff.Contains(searchString) && m.PickUpId.Equals(id));
+
+                return Ok(await airTaxiPickUp.ToListAsync());
+            }
+
+            return Ok();
+        }
+
         // PUT: api/AirTaxiDropOffs/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAirTaxiDropOff([FromRoute] int id, [FromBody] AirTaxiDropOff airTaxiDropOff)

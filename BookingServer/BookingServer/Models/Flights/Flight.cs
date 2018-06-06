@@ -8,7 +8,6 @@ namespace BookingServer.Models.Flights
         public Flight()
         {
             Destination = new HashSet<Destination>();
-            FlBooking = new HashSet<FlBooking>();
         }
 
         public int FlightId { get; set; }
@@ -16,6 +15,5 @@ namespace BookingServer.Models.Flights
         public int AvFlights { get; set; }
 
         public ICollection<Destination> Destination { get; set; }
-        public ICollection<FlBooking> FlBooking { get; set; }
     }
 }

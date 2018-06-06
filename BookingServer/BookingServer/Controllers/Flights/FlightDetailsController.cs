@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Flights;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingServer.Controllers.Flights
 {
@@ -27,16 +28,25 @@ namespace BookingServer.Controllers.Flights
             return _context.FlightDetail;
         }
 
+        [HttpGet, Authorize(Policy = "Administrator")]
+        public IEnumerable<FlightDetail> GetAllDetails()
+        {
+            return _context.FlightDetail.Include(s => s.Dest.Flight)
+                .Include(s => s.C).Include(s => s.FlBooking);
+        }
+
         // GET: api/FlightDetails/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetFlightDetail([FromRoute] int id)
+        [HttpGet("{destId}")]
+        public async Task<IActionResult> GetFlightDetail([FromRoute] int destId)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var flightDetail = _context.FlightDetail.Include(c=>c.C).Where(m => m.DestId.Equals(id));
+            var flightDetail = _context.FlightDetail.Include(c=>c.C)
+                .Include(c=>c.Dest)
+                .Where(m => m.Dest.DestId.Equals(destId));
 
             if (flightDetail == null)
             {

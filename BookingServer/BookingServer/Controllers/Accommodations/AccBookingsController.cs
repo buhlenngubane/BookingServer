@@ -15,12 +15,10 @@ namespace BookingServer.Controllers.Accommodations
     public class AccBookingsController : Controller
     {
         private readonly AccommodationDBContext _context;
-        private readonly UserDBContext _userDB;
 
-        public AccBookingsController(AccommodationDBContext context, UserDBContext userDB)
+        public AccBookingsController(AccommodationDBContext context)
         {
             _context = context;
-            _userDB = userDB;
         }
 
         // GET: api/Bookings
@@ -32,21 +30,21 @@ namespace BookingServer.Controllers.Accommodations
             return _context.AccBooking;
         }
 
-        [HttpGet("{AccId}"), Authorize(Policy ="Administrator")]
-        public async Task<IActionResult> GetBooking([FromRoute] int AccId)
+        [HttpGet("{PropId}"), Authorize(Policy ="Administrator")]
+        public async Task<IActionResult> GetBooking([FromRoute] int PropId)
         {
 
-            if (_context.AccBooking.ToList().Exists(m=>m.AccId.Equals(AccId)))
+            if (_context.AccBooking.ToList().Exists(m=>m.PropId.Equals(PropId)))
             {
-                var user = _context.AccBooking.Where(m => m.AccId.Equals(AccId));
+                var user = _context.AccBooking.Where(m => m.PropId.Equals(PropId));
                 Console.WriteLine("Users" + user);
                 return Ok(await user.ToListAsync());
             }
 
-            Console.WriteLine("Should be true "+_context.Accommodation.Any(m => m.AccId.Equals(AccId)));
+            //Console.WriteLine("Should be true "+_context.Accommodation.Any(m => m.AccId.Equals(PropId)));
 
-            if (_context.Accommodation.Any(m => m.AccId.Equals(AccId)))
-                return NotFound(AccId + ",Not yet booked");
+            if (_context.Property.Any(m => m.PropId.Equals(PropId)))
+                return NotFound(PropId + ", not yet booked");
             else
                 return BadRequest();
         }
@@ -55,26 +53,28 @@ namespace BookingServer.Controllers.Accommodations
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBookings([FromRoute] int id)
         {
-            if (_context.AccBooking.ToList().Exists(m => m.UserId.Equals(id)))
+            Console.WriteLine(User.IsInRole("Admin"));
+            if (User.Identity.Name.Equals(id.ToString()) || User.IsInRole("Admin"))
             {
-                var user = _context.AccBooking.Where(m => m.UserId.Equals(id));
-                Console.WriteLine("Users" + user);
-                return Ok(await user.ToListAsync());
+                if (_context.AccBooking.ToList().Exists(m => m.UserId.Equals(id)))
+                {
+                    var user = _context.AccBooking.Where(m => m.UserId.Equals(id));
+                    Console.WriteLine("Users" + user);
+                    return Ok(await user.ToListAsync());
+                }
+
+                return NotFound("No accommodation booked yet.");
             }
-            
-                return NotFound("No accommodations booked.");
-            //else
-                //return BadRequest();
+            return Unauthorized();
         }
 
         // PUT: api/Bookings/5
         [HttpPut("{email}")]
         public async Task<IActionResult> Update([FromRoute] string email, [FromBody] AccBooking booking)
         {
-            if (!ModelState.IsValid || !UserExists(email))
+            if (!ModelState.IsValid)
             {
-                return !ModelState.IsValid ? 
-                    BadRequest(ModelState) : BadRequest("Email does not exist.");
+                return BadRequest(ModelState);
             }
 
             try
@@ -107,19 +107,26 @@ namespace BookingServer.Controllers.Accommodations
             {
                 return BadRequest(ModelState);
             }
+            Console.WriteLine("UIYHFufyfugygkif");
+            Console.WriteLine(User.Identity.AuthenticationType);
 
-            try
-            {
+            if (User.Identity.Name.Equals(booking.UserId.ToString()) || User.Identity.AuthenticationType == "Administrator")
+                try
+                {
+                
                 _context.AccBooking.Add(booking);
                 await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error: " + ex);
-                return NoContent();
-            }
+                    return CreatedAtAction("GetBooking", new { id = booking.BookingId }, booking);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex);
+                    //Console.WriteLine(booking.PropId + " total" + booking.Total);
+                    return Json("Internal error.");
+                }
 
-            return CreatedAtAction("GetBooking", new { id = booking.BookingId }, booking);
+            return Unauthorized();
+            
         }
 
         // DELETE: api/Bookings/5
@@ -154,11 +161,6 @@ namespace BookingServer.Controllers.Accommodations
         private bool BookingExists(int id)
         {
             return _context.AccBooking.Any(e => e.BookingId == id);
-        }
-
-        private bool UserExists(string email)
-        {
-            return _userDB.User.Any(e => e.Email.Equals(email));
         }
     }
 }

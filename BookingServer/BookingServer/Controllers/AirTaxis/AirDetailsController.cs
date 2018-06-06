@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.AirTaxis;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingServer.Controllers.AirTaxis
 {
@@ -22,21 +23,29 @@ namespace BookingServer.Controllers.AirTaxis
 
         // GET: api/AirDetails
         [HttpGet]
-        public IEnumerable<AirDetail> GetAirDetail()
+        public IEnumerable<AirDetail> GetAll()
         {
             return _context.AirDetail;
         }
 
+        [HttpGet, Authorize(Policy = "Administrator")]
+        public IEnumerable<AirDetail> GetAllDetails()
+        {
+            return _context.AirDetail.Include(s => s.DropOff.PickUp)
+                .Include(s => s.Taxi).Include(s => s.AirBooking);
+        }
+
         // GET: api/AirDetails/5
-        [HttpGet("{search}")]
-        public async Task<IActionResult> GetAirDetail([FromRoute] string search)
+        [HttpGet("{pickId}&{dropId}")]
+        public async Task<IActionResult> GetAirDetail([FromRoute] int pickId, int dropId)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var airDetail = _context.AirDetail.Include(s=>s.Taxi).Where(m => m.DropOff.DropOff.Equals(search));
+            var airDetail = _context.AirDetail.Include(s=>s.Taxi)
+                .Where(m => m.DropOff.PickUpId.Equals(pickId) && m.DropOff.DropOffId.Equals(dropId));
 
             if (airDetail == null)
             {

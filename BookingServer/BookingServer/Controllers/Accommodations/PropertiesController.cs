@@ -27,6 +27,12 @@ namespace BookingServer.Controllers.Accommodations
             return _context.Property;
         }
 
+        [HttpGet, Authorize(Policy = "Administrator")]
+        public IEnumerable<Property> GetAllProperties()
+        {
+            return _context.Property.Include(s => s.Acc).Include(s => s.AccBooking);
+        }
+
         // GET: api/Properties/5
         [HttpGet("{accId}")]
         public async Task<IActionResult> GetProperties([FromRoute] int accId)

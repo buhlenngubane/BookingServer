@@ -5,6 +5,11 @@ namespace BookingServer.Models.AirTaxis
 {
     public partial class AirDetail
     {
+        public AirDetail()
+        {
+            AirBooking = new HashSet<AirBooking>();
+        }
+
         public int AirDetailId { get; set; }
         public int DropOffId { get; set; }
         public int TaxiId { get; set; }
@@ -13,5 +18,6 @@ namespace BookingServer.Models.AirTaxis
 
         public AirTaxiDropOff DropOff { get; set; }
         public Taxi Taxi { get; set; }
+        public ICollection<AirBooking> AirBooking { get; set; }
     }
 }

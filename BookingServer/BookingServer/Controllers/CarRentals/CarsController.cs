@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.CarRentals;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingServer.Controllers.CarRentals
 {
@@ -22,9 +23,15 @@ namespace BookingServer.Controllers.CarRentals
 
         // GET: api/Cars
         [HttpGet]
-        public IEnumerable<Car> GetCar()
+        public IEnumerable<Car> GetAll()
         {
             return _context.Car;
+        }
+
+        [HttpGet, Authorize(Policy="Administrator")]
+        public IEnumerable<Car> GetAllCars()
+        {
+            return _context.Car.Include(s => s.Cmp.Crent).Include(s => s.Ctype).Include(s => s.CarBooking);
         }
 
         // GET: api/Cars/5
