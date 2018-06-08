@@ -8,16 +8,16 @@ namespace BookingServer.Models.Accommodations
         public Property()
         {
             AccBooking = new HashSet<AccBooking>();
+            AccDetail = new HashSet<AccDetail>();
         }
 
         public int PropId { get; set; }
         public int AccId { get; set; }
         public string PropName { get; set; }
-        public int PricePerNight { get; set; }
-        public int AvailableRooms { get; set; }
         public byte[] Picture { get; set; }
 
         public Accommodation Acc { get; set; }
         public ICollection<AccBooking> AccBooking { get; set; }
+        public ICollection<AccDetail> AccDetail { get; set; }
     }
 }

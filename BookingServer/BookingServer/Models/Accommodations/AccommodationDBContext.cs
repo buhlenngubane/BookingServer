@@ -7,6 +7,7 @@ namespace BookingServer.Models.Accommodations
     public partial class AccommodationDBContext : DbContext
     {
         public virtual DbSet<AccBooking> AccBooking { get; set; }
+        public virtual DbSet<AccDetail> AccDetail { get; set; }
         public virtual DbSet<Accommodation> Accommodation { get; set; }
         public virtual DbSet<Property> Property { get; set; }
 
@@ -41,6 +42,19 @@ namespace BookingServer.Models.Accommodations
                     .HasForeignKey(d => d.PropId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_AccBooking_Property");
+            });
+
+            modelBuilder.Entity<AccDetail>(entity =>
+            {
+                entity.HasKey(e => e.DetailId);
+
+                entity.Property(e => e.DateAvailable).HasColumnType("date");
+
+                entity.HasOne(d => d.Prop)
+                    .WithMany(p => p.AccDetail)
+                    .HasForeignKey(d => d.PropId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_AccDetail_Property");
             });
 
             modelBuilder.Entity<Accommodation>(entity =>

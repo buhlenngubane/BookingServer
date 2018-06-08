@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Accommodations;
 using BookingServer.Models.Users;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+using BookingServer.Services;
+using BookingServer.Models;
 
 namespace BookingServer.Controllers.Accommodations
 {
@@ -15,10 +19,13 @@ namespace BookingServer.Controllers.Accommodations
     public class AccBookingsController : Controller
     {
         private readonly AccommodationDBContext _context;
+        private IHubContext<Booking_Notify, ITypedHubClient> _hubContext;
 
-        public AccBookingsController(AccommodationDBContext context)
+        public AccBookingsController(AccommodationDBContext context, 
+            IHubContext<Booking_Notify, ITypedHubClient> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         // GET: api/Bookings
@@ -103,6 +110,7 @@ namespace BookingServer.Controllers.Accommodations
         [HttpPost]
         public async Task<IActionResult> New([FromBody] AccBooking booking)
         {
+            
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -110,12 +118,26 @@ namespace BookingServer.Controllers.Accommodations
             Console.WriteLine("UIYHFufyfugygkif");
             Console.WriteLine(User.Identity.AuthenticationType);
 
-            if (User.Identity.Name.Equals(booking.UserId.ToString()) || User.Identity.AuthenticationType == "Administrator")
+            if (User.Identity.Name.Equals(booking.UserId.ToString()) || User.IsInRole("Administrator"))
                 try
                 {
                 
                 _context.AccBooking.Add(booking);
-                await _context.SaveChangesAsync();
+                // await _context.SaveChangesAsync();
+
+                    var detail = _context.AccDetail.SingleOrDefault(s => s.PropId.Equals(booking.PropId));
+
+                    detail.AvailableRooms -= 1;
+
+                    _context.Entry(detail).State = EntityState.Modified;
+
+                    await _context.SaveChangesAsync();
+
+                    await _hubContext.Clients.All.BroadcastMessage("A user has just book for "
+                        + _context.Property
+                        .Where(m => m.PropId.Equals(booking.PropId))
+                        .Select(s => s.PropName) + ", " + detail.AvailableRooms + " left.");
+
                     return CreatedAtAction("GetBooking", new { id = booking.BookingId }, booking);
                 }
                 catch (Exception ex)
@@ -124,6 +146,8 @@ namespace BookingServer.Controllers.Accommodations
                     //Console.WriteLine(booking.PropId + " total" + booking.Total);
                     return Json("Internal error.");
                 }
+
+            
 
             return Unauthorized();
             

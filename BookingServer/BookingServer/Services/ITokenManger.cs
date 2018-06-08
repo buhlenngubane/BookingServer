@@ -9,7 +9,9 @@ namespace BookingServer.Services
     {
         Task<bool> IsCurrentActiveToken();
         Task DeactivateCurrentAsync();
+        Task RefreshCurrentAsync();
         Task<bool> IsActiveAsync(string token);
         Task DeactivateAsync(string token);
+        Task RefreshAsync(string token);
     }
 }

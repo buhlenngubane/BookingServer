@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using BookingServer.Models;
 using BookingServer.Models.Accommodations;
 using BookingServer.Models.AirTaxis;
 using BookingServer.Models.CarRentals;
@@ -37,7 +38,8 @@ namespace BookingServer
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<JwtSettings>(Configuration.GetSection("JWTSettings"));
+            services.Configure<JwtSettings>(Configuration.GetSection("JWTSettings"))
+                .Configure<Redis>(Configuration.GetSection("redis"));
 
             services.AddAuthentication(options=> 
             {
@@ -85,9 +87,11 @@ namespace BookingServer
 
             services.AddLogging();
 
-            services.AddTransient<TokenManagerMiddleware>();
-
-            services.AddTransient<ITokenManager, TokenManager>();
+            services.AddTransient<TokenManagerMiddleware>()
+                //.AddTransient<PropDetailMiddleware>()
+                .AddTransient<ITokenManager, TokenManager>()
+                //.AddTransient<IPropDetail, PropDetail>();
+                ;
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -115,22 +119,18 @@ namespace BookingServer
             services.AddDbContext<UserDBContext>(
                 options =>
                 options.UseSqlServer(Configuration.GetConnectionString("UserDatabase"))
-            );
-
-            services.AddDbContext<AccommodationDBContext>(options =>
+            )
+            .AddDbContext<AccommodationDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("AccommodationDatabase"))
 
-            );
-
-            services.AddDbContext<FlightDBContext>(options =>
+            )
+            .AddDbContext<FlightDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("FlightDatabase"))
-            );
-
-            services.AddDbContext<CarRentalDBContext>(options =>
+            )
+            .AddDbContext<CarRentalDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("CarRentalDatabase"))
-            );
-
-            services.AddDbContext<AirTaxiDBContext>(options =>
+            )
+            .AddDbContext<AirTaxiDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("AirTaxiDatabase"))
             );
 
@@ -169,7 +169,9 @@ namespace BookingServer
 
             app.UseAuthentication();
 
-            app.UseMiddleware<TokenManagerMiddleware>();
+            app.UseMiddleware<TokenManagerMiddleware>()
+                //.UseMiddleware<PropDetailMiddleware>()
+                ;
 
             app.UseCors("ClientDomain");
 

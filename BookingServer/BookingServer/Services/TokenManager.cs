@@ -31,6 +31,12 @@ namespace BookingServer.Services
         public async Task DeactivateCurrentAsync()
             => await DeactivateAsync(GetCurrentAsync());
 
+        public async Task RefreshCurrentAsync()
+        //=>
+        {
+            await RefreshAsync(GetCurrentAsync());
+        }
+
         public async Task<bool> IsActiveAsync(string token)
             => await _cache.GetStringAsync(GetKey(token)) == null;
 
@@ -41,11 +47,16 @@ namespace BookingServer.Services
                     AbsoluteExpirationRelativeToNow =
                         TimeSpan.FromMinutes(_jwtSettings.Value.ExpiryMinutes)
                 });
+        
+
+        public async Task RefreshAsync(string token)
+            => await _cache.RefreshAsync(GetKey(token));
 
         private string GetCurrentAsync()
         {
             var authorizationHeader = _httpContextAccessor
                 .HttpContext.Request.Headers["authorization"];
+
 
             return authorizationHeader == StringValues.Empty
                 ? string.Empty

@@ -7,6 +7,7 @@ using BookingServer.Models.Users;
 using BookingServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -38,6 +39,32 @@ namespace BookingServer.Controllers.Service
             user.Password = "";
             //var userName = User.Identity.Name;
             return Ok(user);
+        }
+
+        [HttpGet, Authorize]
+        public async Task<IActionResult> Refresh()
+        {
+            IActionResult response = BadRequest("Unable to refresh token!");
+            try
+            {
+                var user = await _context.User.SingleOrDefaultAsync(m => m.UserId.Equals(int.Parse(User.Identity.Name)));
+                
+                await _tokenManager.DeactivateCurrentAsync();
+
+                Console.WriteLine("Deactivating user" + User.Claims + " UserId : "+ User.Identity.Name);
+
+                var tokenString = BuildToken(user);
+                response = Ok(new { token = tokenString });
+                Console.WriteLine("New Token for userId: "+ User.Identity.Name + " token: " + tokenString);
+                return response;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+
+                return response;
+            }
+            
         }
 
         [AllowAnonymous]
@@ -77,7 +104,7 @@ namespace BookingServer.Controllers.Service
         }
 
         [HttpPost, Authorize]
-        public async Task<IActionResult> LogOut([FromBody] User user)
+        public async Task<IActionResult> LogOut()
         {
             if(ModelState.IsValid)
             {

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Accommodations;
 using Microsoft.AspNetCore.Authorization;
+using BookingServer.Services;
 
 namespace BookingServer.Controllers.Accommodations
 {
@@ -37,17 +38,57 @@ namespace BookingServer.Controllers.Accommodations
         [HttpGet("{accId}")]
         public async Task<IActionResult> GetProperties([FromRoute] int accId)
         {
-            var @property =  _context.Property.Where(s => s.AccId.Equals(accId));
-
-            //@property = @property.Where(m => m.AccId.Equals(AccId));
-            //await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
-
-            if (@property == null)
+            try
             {
-                return NotFound();
-            }
+                //if (detail.Stored)
+                //{
+                  //  var prop = detail.GetAccommodation(accId);
+                    /*if (prop == null)
+                    {
+                        var @property = _context.Property.Where(s => s.AccId.Equals(accId)).Include(s => s.AccDetail);
 
-            return Ok(await @property.ToListAsync());
+                        //@property = @property.Where(m => m.AccId.Equals(AccId));
+                        //await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
+
+                        if (@property == null)
+                        {
+                            return NotFound();
+                        }
+
+                        return Ok(await @property.ToListAsync());
+                    }*/
+
+                    //return Ok(await prop);
+                //}
+                //else
+                //{
+                    //Console.WriteLine("Is strored or not " + detail.Stored);
+                    var @property = _context.Property.Where(s => s.AccId.Equals(accId)).Include(s => s.AccDetail);
+
+                    //var list = property.Select(s => s.AccDetail);
+                    //await list.ForEachAsync(s => detail.AddAccommodation(s));
+                    //foreach (AccDetail[] d in @property.Select(s => s.AccDetail).ToList())
+                    //{
+                        //detail.AddAccommodation(@property.Select(s => s.AccDetail).ToAsyncEnumerable());
+                    //}
+
+
+                    //@property = @property.Where(m => m.AccId.Equals(AccId));
+                    //await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
+
+                    if (@property == null)
+                    {
+                        return NotFound();
+                    }
+
+                    return Ok(await @property.ToListAsync());
+                //}
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{AccId}&{PropName}")]

@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 
 namespace BookingServer.Services
 {
-    public class Booking_Notify:Hub
+    public class Booking_Notify:Hub<ITypedHubClient>
     {
-        public Task Send(string data)
+        /*public Task Send(string data)
         {
             return Clients.All.SendAsync("Send", data);
-        }
+        }*/
     }
 }
