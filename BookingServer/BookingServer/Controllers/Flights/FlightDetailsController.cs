@@ -36,8 +36,8 @@ namespace BookingServer.Controllers.Flights
         }
 
         // GET: api/FlightDetails/5
-        [HttpGet("{destId}")]
-        public async Task<IActionResult> GetFlightDetail([FromRoute] int destId)
+        [HttpGet("{destString}")]
+        public async Task<IActionResult> GetFlightDetail([FromRoute] string destString)
         {
             if (!ModelState.IsValid)
             {
@@ -46,7 +46,7 @@ namespace BookingServer.Controllers.Flights
 
             var flightDetail = _context.FlightDetail.Include(c=>c.C)
                 .Include(c=>c.Dest)
-                .Where(m => m.Dest.DestId.Equals(destId));
+                .Where(m => m.Dest.Destination1.Equals(destString));
 
             if (flightDetail == null)
             {

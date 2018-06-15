@@ -91,10 +91,20 @@ namespace BookingServer.Controllers.Flights
                 return BadRequest(ModelState);
             }
 
-            _context.Flight.Add(flight);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Flight.Add(flight);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetFlight", new { id = flight.FlightId }, flight);
+                return CreatedAtAction("GetFlight", new { id = flight.FlightId }, flight);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Console.WriteLine(ex.Source);
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE: api/Flights/5

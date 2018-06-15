@@ -42,7 +42,7 @@ namespace BookingServer.Controllers.CarRentals
 
             var ccompany = _context.Ccompany.Where(m => m.CrentId.Equals(id));
 
-            if (ccompany == null)
+            if (!ccompany.Any())
             {
                 return NotFound();
             }

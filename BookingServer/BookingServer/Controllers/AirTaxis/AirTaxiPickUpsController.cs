@@ -90,10 +90,21 @@ namespace BookingServer.Controllers.AirTaxis
                 return BadRequest(ModelState);
             }
 
-            _context.AirTaxiPickUp.Add(airTaxiPickUp);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.AirTaxiPickUp.Add(airTaxiPickUp);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAirTaxiPickUp", new { id = airTaxiPickUp.PickUpId }, airTaxiPickUp);
+                return CreatedAtAction("GetAirTaxiPickUp", new { id = airTaxiPickUp.PickUpId }, airTaxiPickUp);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Console.WriteLine(ex.Source);
+
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE: api/AirTaxiPickUps/5

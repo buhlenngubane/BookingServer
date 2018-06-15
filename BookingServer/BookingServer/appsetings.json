@@ -13,7 +13,7 @@
     "SecretKey": "whoWhoAreYouStranger",
     "Issuer": "http://localhost:5000",
     "Audience": "http://localhost:4200",
-    "expiryMinutes": "5"
+    "expiryMinutes": "10"
   },
 
   "Client": {
@@ -22,5 +22,17 @@
   "redis": {
     "connectionString": "localhost",
     "expiryTime": "20"
+  },
+
+  "EmailConfiguration": {
+    "SmtpServer": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "SmtpUsername": "validtest.r.me@gmail.com",
+    "SmtpPassword": "ReversideBooking",
+
+    "PopServer": "popserver",
+    "PopPort": 995,
+    "PopUsername": "popusername",
+    "PopPassword": "poppassword"
   }
 }

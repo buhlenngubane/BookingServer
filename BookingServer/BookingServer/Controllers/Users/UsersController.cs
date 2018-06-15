@@ -7,6 +7,16 @@ using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Users;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
+using BookingServer.Models.Email;
+using MimeKit;
+using MimeKit.Text;
+using MailKit.Net.Smtp;
+using BookingServer.Services.Email;
+using System.Security.Cryptography.X509Certificates;
+using Google.Apis.Auth.OAuth2;
+using System.Threading;
+using System.IO;
+using MailKit.Security;
 
 namespace BookingServer.Controllers.Users
 {
@@ -16,13 +26,17 @@ namespace BookingServer.Controllers.Users
     {
         private readonly UserDBContext _context;
         private readonly JwtSettings _options;
+        private readonly IEmailConfiguration _emailConfiguration;
 
-        public UsersController(UserDBContext context, IOptions<JwtSettings> optionsAccessor)
+        public UsersController(UserDBContext context,
+            IOptions<JwtSettings> optionsAccessor,
+            IEmailConfiguration emailConfiguration)
         {
             _context = context;
             _options = optionsAccessor.Value;
-        }
+            _emailConfiguration = emailConfiguration;
 
+        }
         // GET: api/Users
         [HttpGet, Authorize(Policy = "Administrator")]
         public IEnumerable<User> GetAll()
@@ -63,12 +77,6 @@ namespace BookingServer.Controllers.Users
                 Console.WriteLine("Error : "+ex);
                 return BadRequest();
             }
-            //User sendUser = new User(user.Name,user.Email);
-            //user.Password = "";
-            //sendUser.UserId = user.UserId;
-            //sendUser.Name = user.Name;
-
-            //return Ok("{userId:"+user.UserId+", name:"+user.Name+"}");
             return Ok(user);
         }
 
@@ -124,46 +132,17 @@ namespace BookingServer.Controllers.Users
             return CreatedAtAction("GetUser", new { id = user.UserId });
         }
 
-        /*[HttpPost]
-        public async Task<IActionResult> SignIn([FromBody] User userRequest)
-        {
-            //Console.WriteLine("Models=State passed: " + userRequest.Email);
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            //Console.WriteLine("Models=State passed: "+ userRequest.Email);
-            try
-            {
-                var user = await _context.User.SingleOrDefaultAsync(m => m.Email == userRequest.Email);
-                var userp = await _context.User.SingleOrDefaultAsync(m => m.Password == userRequest.Password);
-
-                if (user.Equals(null) || userp.Equals(null))
-                {
-                    return user.Equals(null) ? NotFound("Email not found") : NotFound("Password not found");
-                }
-                return Ok(user);
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine("Error occured: "+ ex);
-                return BadRequest("Error occured: " + ex);
-            }
-            
-
-            
-        }*/
 
         // DELETE: api/Users/5
-        [HttpDelete("{email}"),Authorize]
-        public async Task<IActionResult> DeleteUser([FromRoute] string email)
+        [HttpDelete("{id}"),Authorize]
+        public async Task<IActionResult> DeleteUser([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var user = await _context.User.SingleOrDefaultAsync(m => m.Email == email);
+            var user = await _context.User.SingleOrDefaultAsync(m => m.UserId.Equals(id));
             if (user == null)
             {
                 return NotFound();
@@ -188,6 +167,49 @@ namespace BookingServer.Controllers.Users
         private bool UserExists(int id, string email)
         {
             return _context.User.Any(e => e.UserId.Equals(id) && e.Email.Equals(email));
+        }
+
+        private void Send(EmailMessage emailMessage)
+        {
+            try
+            {
+
+                var message = new MimeMessage();
+                message.To.AddRange(emailMessage.ToAddresses.Select(x => new MailboxAddress(x.Name, x.Address)));
+                message.From.AddRange(emailMessage.FromAddresses.Select(x => new MailboxAddress(x.Name, x.Address)));
+
+                message.Subject = emailMessage.Subject;
+                //We will say we are sending HTML. But there are options for plaintext etc. 
+                message.Body = new TextPart(TextFormat.Html)
+                {
+                    Text = emailMessage.Content
+                };
+
+                //Be careful that the SmtpClient class is the one from Mailkit not the framework!
+                using (var emailClient = new SmtpClient())
+                {
+                    //The last parameter here is to use SSL (Which you should!)
+                    emailClient.Connect(_emailConfiguration.SmtpServer, _emailConfiguration.SmtpPort);
+
+                    //Remove any OAuth functionality as we won't be using it. 
+                    emailClient.AuthenticationMechanisms.Remove("XOAUTH2");
+
+                    emailClient.Authenticate(_emailConfiguration.SmtpUsername, _emailConfiguration.SmtpPassword);
+
+                    emailClient.Send(message);
+
+                    emailClient.Disconnect(true);
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.Source);
+                Console.WriteLine(ex.StackTrace);
+            }
+
         }
     }
 }

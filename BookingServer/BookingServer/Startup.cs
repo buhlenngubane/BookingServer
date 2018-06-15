@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +10,9 @@ using BookingServer.Models.CarRentals;
 using BookingServer.Models.Flights;
 using BookingServer.Models.Users;
 using BookingServer.Services;
+using BookingServer.Services.Email;
 using BookingServer.Web.Filters;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -50,6 +53,7 @@ namespace BookingServer
                 }
                 catch(Exception ex)
                 {
+                    Debug.WriteLine(ex);
                     Console.WriteLine("Authentication failed: "+ex);
                 }
 
@@ -85,13 +89,14 @@ namespace BookingServer
                 }
              );
 
+            
+
             services.AddLogging();
 
-            services.AddTransient<TokenManagerMiddleware>()
+            services.AddTransient<TokenManagerMiddleware>();
                 //.AddTransient<PropDetailMiddleware>()
-                .AddTransient<ITokenManager, TokenManager>()
-                //.AddTransient<IPropDetail, PropDetail>();
-                ;
+                
+            services.AddTransient<ITokenManager, TokenManager>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -119,18 +124,22 @@ namespace BookingServer
             services.AddDbContext<UserDBContext>(
                 options =>
                 options.UseSqlServer(Configuration.GetConnectionString("UserDatabase"))
-            )
-            .AddDbContext<AccommodationDBContext>(options =>
+            );
+
+            services.AddDbContext<AccommodationDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("AccommodationDatabase"))
 
-            )
-            .AddDbContext<FlightDBContext>(options =>
+            );
+
+            services.AddDbContext<FlightDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("FlightDatabase"))
-            )
-            .AddDbContext<CarRentalDBContext>(options =>
+            );
+
+            services.AddDbContext<CarRentalDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("CarRentalDatabase"))
-            )
-            .AddDbContext<AirTaxiDBContext>(options =>
+            );
+
+            services.AddDbContext<AirTaxiDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("AirTaxiDatabase"))
             );
 
@@ -146,13 +155,17 @@ namespace BookingServer
             });
 
             services.AddSignalR();
+
+            services.AddSingleton<IEmailConfiguration>(Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>());
+
+            services.AddTransient<IEmailService, EmailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env
             , ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddDebug().AddConsole();
+            //loggerFactory.AddDebug().AddConsole();
 
             if (env.IsDevelopment())
             {
@@ -174,6 +187,8 @@ namespace BookingServer
                 ;
 
             app.UseCors("ClientDomain");
+
+            app.UseStaticFiles();
 
             app.UseSignalR(route =>
             {

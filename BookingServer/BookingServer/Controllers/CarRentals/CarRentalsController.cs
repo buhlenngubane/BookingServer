@@ -106,10 +106,21 @@ namespace BookingServer.Controllers.CarRentals
                 return BadRequest(ModelState);
             }
 
-            _context.CarRental.Add(carRental);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.CarRental.Add(carRental);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCarRental", new { id = carRental.CrentId }, carRental);
+                return CreatedAtAction("GetCarRental", new { id = carRental.CrentId }, carRental);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Console.WriteLine(ex.Source);
+
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE: api/CarRentals/5

@@ -36,8 +36,8 @@ namespace BookingServer.Controllers.AirTaxis
         }
 
         // GET: api/AirDetails/5
-        [HttpGet("{pickId}&{dropId}")]
-        public async Task<IActionResult> GetAirDetail([FromRoute] int pickId, int dropId)
+        [HttpGet("{pickUp}&{dropOff}")]
+        public async Task<IActionResult> GetAirDetail([FromRoute] string pickUp, string dropOff)
         {
             if (!ModelState.IsValid)
             {
@@ -45,7 +45,7 @@ namespace BookingServer.Controllers.AirTaxis
             }
 
             var airDetail = _context.AirDetail.Include(s=>s.Taxi)
-                .Where(m => m.DropOff.PickUpId.Equals(pickId) && m.DropOff.DropOffId.Equals(dropId));
+                .Where(m => m.DropOff.PickUp.PickUp.Equals(pickUp) && m.DropOff.DropOff.Equals(dropOff));
 
             if (airDetail == null)
             {

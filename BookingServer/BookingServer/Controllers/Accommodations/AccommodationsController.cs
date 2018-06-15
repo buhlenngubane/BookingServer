@@ -69,7 +69,6 @@ namespace BookingServer.Controllers.Accommodations
             //if (!locations.Equals(null))
             return Ok();
             //else
-                
         }
         
 
@@ -172,6 +171,8 @@ namespace BookingServer.Controllers.Accommodations
             try
             {
                 await _context.SaveChangesAsync();
+                return CreatedAtAction("GetAccommodation",
+                new { id = accommodation.AccId }, accommodation);
             }
             catch (DbUpdateException ex)
             {
@@ -182,12 +183,11 @@ namespace BookingServer.Controllers.Accommodations
                 else
                 {
                     Console.WriteLine("Error: "+ex);
-                    return NoContent();
+                    return BadRequest(ex.Message);
                 }
             }
 
-            return CreatedAtAction("GetAccommodation", 
-                new { id = accommodation.AccId }, accommodation);
+            
         }
 
         // DELETE: api/Accommodations/5

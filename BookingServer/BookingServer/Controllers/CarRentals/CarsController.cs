@@ -48,9 +48,9 @@ namespace BookingServer.Controllers.CarRentals
                 .Where(m => m.Cmp.Crent.Location.Equals(search)).OrderBy(s=>s.Price);
 
             //list.Load();
-            
 
-            if (list.Equals(null))
+            
+            if (!list.Any())
             {
                 return NotFound();
             }
