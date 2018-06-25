@@ -124,7 +124,7 @@ namespace BookingServer.Controllers.CarRentals
                         detail.First().Ctype.Name + "<br/>" + detail.First().Cmp.CompanyName + "<br/>" +
                         "<br/>" + "Booked date for pickUp: " + carBooking.BookDate +
                         "<br/>PayType: " + carBooking.PayType + "<br/>Total: R" + carBooking.Total +
-                        "<br/><br/>Kind Regards,\nBooking.com");
+                        "<br/><br/>Kind Regards,<br/>Booking.com");
 
                     message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));

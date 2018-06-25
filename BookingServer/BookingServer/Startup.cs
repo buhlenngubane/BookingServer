@@ -95,7 +95,6 @@ namespace BookingServer
                 services.AddLogging();
 
                 services.AddTransient<TokenManagerMiddleware>();
-                //.AddTransient<PropDetailMiddleware>()
 
                 services.AddTransient<ITokenManager, TokenManager>();
 
@@ -167,7 +166,7 @@ namespace BookingServer
             }
             catch (Exception ex)
             {
-                // Log.Fatal(ex, "Host services not loaded!");
+                Log.Fatal(ex, " Host services not loaded!");
                 Console.WriteLine(ex);
             }
         }
@@ -193,9 +192,7 @@ namespace BookingServer
 
             app.UseAuthentication();
 
-            app.UseMiddleware<TokenManagerMiddleware>()
-                //.UseMiddleware<PropDetailMiddleware>()
-                ;
+            app.UseMiddleware<TokenManagerMiddleware>();
 
             app.UseCors("ClientDomain");
 

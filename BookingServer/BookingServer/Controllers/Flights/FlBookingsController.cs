@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Flights;
@@ -124,7 +123,7 @@ namespace BookingServer.Controllers.Flights
                         "<br/>Departure time: " + detail.First().Departure.Split(' ')[1] + "<br/>" +
                         Return != null? "ReturnTrip date: " + Return + "<br/>PayType: " + flBooking.PayType: "<br/>PayType: " + flBooking.PayType +
                         "<br/>Number of travellers: " + flBooking.Travellers + "<br/>Total: R" + flBooking.Total +
-                        "<br/><br/>Kind Regards,\nBooking.com");
+                        "<br/><br/>Kind Regards,<br/>Booking.com");
 
                     message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));

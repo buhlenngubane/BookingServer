@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Accommodations;
@@ -10,7 +9,6 @@ using BookingServer.Models.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using BookingServer.Services;
-using BookingServer.Models;
 using BookingServer.Models.Email;
 using BookingServer.Services.Email;
 
@@ -162,7 +160,7 @@ namespace BookingServer.Controllers.Accommodations
                         detail.First().Prop.Acc.Country + "<br/>" + detail.First().Prop.Acc.Location + "<br/>" +
                         detail.First().Prop.PropName + "<br/>Booking date: " + booking.BookDate + "<br/>Nummber of nights booked: " +
                         booking.NumOfNights + "<br/>Total: R " + booking.Total +
-                        "<br/><br/>Kind Regards,\nBooking.com");
+                        "<br/><br/>Kind Regards,<br/>Booking.com");
 
                     message.FromAddresses.Add(new EmailAddress("BookingServer.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));

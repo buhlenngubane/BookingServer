@@ -146,7 +146,7 @@ namespace BookingServer.Controllers.AirTaxis
                         airBooking.TaxiName + "<br/>" + "Booked date for pickUp: " + airBooking.BookDate +
                         Return != null ? "ReturnTrip date: " + Return + "<br/>PayType: " + airBooking.PayType : "<br/>PayType: " + airBooking.PayType +
                         "<br/>Number of passengers: " + airBooking.Passengers + "<br/>Total: R" + airBooking.Total +
-                        "<br/><br/>Kind Regards,\nBooking.com");
+                        "<br/><br/>Kind Regards,<br/>Booking.com");
 
                     message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
