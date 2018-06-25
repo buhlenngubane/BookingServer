@@ -14,7 +14,14 @@ namespace BookingServer.Models.Accommodations
         public AccommodationDBContext(DbContextOptions<AccommodationDBContext> options)
                             : base(options)
         {
-            Database.EnsureCreated();
+            try
+            {
+                Database.EnsureCreated();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

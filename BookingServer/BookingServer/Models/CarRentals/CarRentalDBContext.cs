@@ -15,7 +15,14 @@ namespace BookingServer.Models.CarRentals
         public CarRentalDBContext(DbContextOptions<CarRentalDBContext> options)
                     : base(options)
         {
-            Database.EnsureCreated();
+            try
+            {
+                Database.EnsureCreated();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

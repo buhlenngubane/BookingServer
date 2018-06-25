@@ -15,7 +15,14 @@ namespace BookingServer.Models.AirTaxis
         public AirTaxiDBContext(DbContextOptions<AirTaxiDBContext> options)
                                     : base(options)
         {
-            Database.EnsureCreated();
+            try
+            {
+                Database.EnsureCreated();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
