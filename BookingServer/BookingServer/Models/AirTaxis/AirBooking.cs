@@ -8,6 +8,7 @@ namespace BookingServer.Models.AirTaxis
         public int BookingId { get; set; }
         public int UserId { get; set; }
         public int AirDetailId { get; set; }
+        public string TaxiName { get; set; }
         public DateTime BookDate { get; set; }
         public DateTime? ReturnJourney { get; set; }
         public int Passengers { get; set; }

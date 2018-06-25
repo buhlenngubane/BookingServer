@@ -7,8 +7,10 @@ namespace BookingServer.Models.Email
 {
     public class EmailMessage
     {
-        public EmailMessage()
+        public EmailMessage(string subject, string content)
         {
+            Subject = subject;
+            Content = content;
             ToAddresses = new List<EmailAddress>();
             FromAddresses = new List<EmailAddress>();
         }

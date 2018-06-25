@@ -31,90 +31,35 @@ namespace BookingServer.Controllers.Accommodations
         [HttpGet, Authorize(Policy = "Administrator")]
         public IEnumerable<Property> GetAllProperties()
         {
-            return _context.Property.Include(s => s.Acc).Include(s => s.AccBooking);
+            return _context.Property.Include(s => s.Acc).Include(s => s.AccDetail);
         }
 
-        // GET: api/Properties/5
-        [HttpGet("{accId}")]
-        public async Task<IActionResult> GetProperties([FromRoute] int accId)
-        {
-            try
-            {
-                //if (detail.Stored)
-                //{
-                  //  var prop = detail.GetAccommodation(accId);
-                    /*if (prop == null)
-                    {
-                        var @property = _context.Property.Where(s => s.AccId.Equals(accId)).Include(s => s.AccDetail);
-
-                        //@property = @property.Where(m => m.AccId.Equals(AccId));
-                        //await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
-
-                        if (@property == null)
-                        {
-                            return NotFound();
-                        }
-
-                        return Ok(await @property.ToListAsync());
-                    }*/
-
-                    //return Ok(await prop);
-                //}
-                //else
-                //{
-                    //Console.WriteLine("Is strored or not " + detail.Stored);
-                    var @property = _context.Property.Where(s => s.AccId.Equals(accId)).Include(s => s.AccDetail);
-
-                    //var list = property.Select(s => s.AccDetail);
-                    //await list.ForEachAsync(s => detail.AddAccommodation(s));
-                    //foreach (AccDetail[] d in @property.Select(s => s.AccDetail).ToList())
-                    //{
-                        //detail.AddAccommodation(@property.Select(s => s.AccDetail).ToAsyncEnumerable());
-                    //}
-
-
-                    //@property = @property.Where(m => m.AccId.Equals(AccId));
-                    //await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
-
-                    if (@property == null)
-                    {
-                        return NotFound();
-                    }
-
-                    return Ok(await @property.ToListAsync());
-                //}
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex);
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet("{AccId}&{PropName}")]
-        public async Task<IActionResult> GetProperty([FromRoute] int AccId, string PropName)
+        [HttpGet("{country}&{location}")]
+        public async Task<IActionResult> GetProperties([FromRoute] string country, string location)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            /*var @property = 
-                await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId) && 
-                m.PropName.Contains(PropName));*/
-            var @property = from m in _context.Property
-                            select m;
+            var @property = _context.Property.Include(s => s.AccDetail).Where(m => m.Acc.Country.Equals(country) && 
+                m.Acc.Location.Equals(location));
+            
 
-            @property = @property.Where(m => m.AccId.Equals(AccId) &&
-                m.PropName.Contains(PropName));
-            //await _context.Property.SingleOrDefaultAsync(m => m.AccId.Equals(AccId));
-
-            if (@property == null)
+            if (!@property.Any())
             {
+                if (location == "")
+                {
+                    var Country = _context.Property.Include(s => s.AccDetail).Where(m => m.Acc.Country.Equals(country));
+
+                    if (Country.Any())
+                        return Ok(await Country.ToListAsync());
+                }
+
                 return NotFound();
             }
 
-            return View(await @property.ToListAsync());
+            return Ok(await @property.ToListAsync());
         }
 
         // PUT: api/Properties/5

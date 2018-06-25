@@ -28,27 +28,6 @@ namespace BookingServer.Controllers.Accommodations
             return _context.Accommodation;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAccomPropBook()
-        {
-            try
-            {
-                var AccomPropBook = from accomPropBook in _context.Accommodation
-                                    join detail in _context.Property.Include(s => s.AccBooking)
-                                    on accomPropBook.AccId equals detail.AccId
-                                    into Details
-                                    //from m in Details.DefaultIfEmpty()
-                                    select new { Details };
-
-                return Ok(await AccomPropBook.ToListAsync());
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.InnerException);
-                return BadRequest("Noooooooooo!!!!!!");
-            }
-        }
         [HttpGet("{searchString?}")]
         public async Task<IActionResult> Search([FromRoute] string searchString)
         {
@@ -66,9 +45,8 @@ namespace BookingServer.Controllers.Accommodations
 
                 return Ok(await acc.ToListAsync());
             }
-            //if (!locations.Equals(null))
+
             return Ok();
-            //else
         }
         
 
@@ -88,42 +66,12 @@ namespace BookingServer.Controllers.Accommodations
                 accommodation = accommodation.Where(s => s.Country.Contains(Country));
             }
 
-            if (accommodation == null)
+            if (!accommodation.Any())
             {
                 return NotFound();
             }
 
-            return View(await accommodation.ToListAsync());
-        }
-
-        // GET: api/Accommodations/South Africa & Duran
-        [HttpGet("{Country}&{Location}")]
-        public async Task<IActionResult> SpecificLocation([FromRoute] string Country, string Location)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var accommodation = from m in _context.Accommodation
-                                select m;
-
-            if (!String.IsNullOrEmpty(Country) && !String.IsNullOrEmpty(Country))
-            {
-                accommodation = 
-                    accommodation.Where(s => s.Country.Equals(Country) && s.Location.Contains(Location));
-            }
-
-            /*var accommodation = await
-                _context.Accommodation.SingleOrDefaultAsync(m => 
-                m.Country.Equals(Country) && m.Location.Contains(Location));*/
-
-            if (accommodation == null)
-            {
-                return NotFound();
-            }
-
-            return View(await accommodation.ToListAsync());
+            return Ok(await accommodation.ToListAsync());
         }
 
         // PUT: api/Accommodations

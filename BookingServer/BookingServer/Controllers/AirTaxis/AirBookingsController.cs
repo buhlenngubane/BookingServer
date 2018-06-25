@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.AirTaxis;
 using Microsoft.AspNetCore.Authorization;
+using BookingServer.Services.Email;
+using BookingServer.Models.Users;
+using BookingServer.Models.Email;
 
 namespace BookingServer.Controllers.AirTaxis
 {
@@ -15,10 +18,15 @@ namespace BookingServer.Controllers.AirTaxis
     public class AirBookingsController : Controller
     {
         private readonly AirTaxiDBContext _context;
+        private readonly UserDBContext _userDB;
+        private readonly IEmailConfiguration _emailConfiguration;
 
-        public AirBookingsController(AirTaxiDBContext context)
+        public AirBookingsController(AirTaxiDBContext context,
+            UserDBContext userDB, IEmailConfiguration emailConfiguration)
         {
             _context = context;
+            _userDB = userDB;
+            _emailConfiguration = emailConfiguration;
         }
 
         // GET: api/AirBookings
@@ -60,7 +68,7 @@ namespace BookingServer.Controllers.AirTaxis
                 return BadRequest(ModelState);
             }
 
-            if (User.Identity.Name.Equals(id.ToString()))
+            if (User.Identity.Name.Equals(id.ToString()) || User.IsInRole("Admin"))
             {
 
                 if (_context.AirBooking.ToList().Exists(m => m.UserId.Equals(id)))
@@ -120,19 +128,35 @@ namespace BookingServer.Controllers.AirTaxis
                 return BadRequest(ModelState);
             }
 
-            if (User.Identity.Name.Equals(airBooking.UserId.ToString()))
+            if (User.Identity.Name.Equals(airBooking.UserId.ToString()) || User.IsInRole("Admin"))
             {
                 try
                 {
+                    var user = await _userDB.User.SingleOrDefaultAsync(s => s.UserId.Equals(airBooking.UserId));
+                    var detail = _context.AirDetail.Where(s => s.AirDetailId.Equals(airBooking.AirDetailId))
+                        .Include(s => s.DropOff).Include(s => s.DropOff.PickUp).Include(s => s.Taxi);
                     _context.AirBooking.Add(airBooking);
                     await _context.SaveChangesAsync();
+                    // EmailAddress address = new EmailAddress();
+                    var Return = airBooking.ReturnJourney.HasValue ? airBooking.ReturnJourney : null;
 
-                    return CreatedAtAction("GetAirBooking", new { id = airBooking.BookingId }, airBooking);
+                    EmailMessage message = new EmailMessage("Flight Booking", "Hi " + user.Name + ",<br/><br/>" +
+                        "You have just booked for a taxi using our a web services, the full details of the booking are: <br/>" +
+                        detail.First().DropOff.PickUp.PickUp + "<br/>" + detail.First().DropOff.DropOff + "<br/>" +
+                        airBooking.TaxiName + "<br/>" + "Booked date for pickUp: " + airBooking.BookDate +
+                        Return != null ? "ReturnTrip date: " + Return + "<br/>PayType: " + airBooking.PayType : "<br/>PayType: " + airBooking.PayType +
+                        "<br/>Number of passengers: " + airBooking.Passengers + "<br/>Total: R" + airBooking.Total +
+                        "<br/><br/>Kind Regards,\nBooking.com");
+
+                    message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
+                    message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
+                    Send send = new Send(message, _emailConfiguration);
+                    return CreatedAtAction("GetFlBooking", new { id = airBooking.BookDate }, airBooking);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex);
-                    return Json("Internal error.");
+                    return Json("Internal error");
                 }
             }
 

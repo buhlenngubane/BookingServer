@@ -68,8 +68,7 @@ namespace BookingServer.Controllers.Users
                 }
                 else if(!user.UserId.Equals(userp.UserId))
                 {
-                    Console.WriteLine("Possible hack!!!");
-                    return BadRequest();
+                    throw new Exception("User tried to log in with incorrect token");
                 }
             }
             catch(Exception ex)
@@ -123,9 +122,6 @@ namespace BookingServer.Controllers.Users
                 return !ModelState.IsValid?BadRequest(ModelState):BadRequest("Email exists");
             }
 
-            //if(UserExists(user.Email))
-               // return Bad
-
             _context.User.Add(user);
             await _context.SaveChangesAsync();
 
@@ -169,47 +165,6 @@ namespace BookingServer.Controllers.Users
             return _context.User.Any(e => e.UserId.Equals(id) && e.Email.Equals(email));
         }
 
-        private void Send(EmailMessage emailMessage)
-        {
-            try
-            {
-
-                var message = new MimeMessage();
-                message.To.AddRange(emailMessage.ToAddresses.Select(x => new MailboxAddress(x.Name, x.Address)));
-                message.From.AddRange(emailMessage.FromAddresses.Select(x => new MailboxAddress(x.Name, x.Address)));
-
-                message.Subject = emailMessage.Subject;
-                //We will say we are sending HTML. But there are options for plaintext etc. 
-                message.Body = new TextPart(TextFormat.Html)
-                {
-                    Text = emailMessage.Content
-                };
-
-                //Be careful that the SmtpClient class is the one from Mailkit not the framework!
-                using (var emailClient = new SmtpClient())
-                {
-                    //The last parameter here is to use SSL (Which you should!)
-                    emailClient.Connect(_emailConfiguration.SmtpServer, _emailConfiguration.SmtpPort);
-
-                    //Remove any OAuth functionality as we won't be using it. 
-                    emailClient.AuthenticationMechanisms.Remove("XOAUTH2");
-
-                    emailClient.Authenticate(_emailConfiguration.SmtpUsername, _emailConfiguration.SmtpPassword);
-
-                    emailClient.Send(message);
-
-                    emailClient.Disconnect(true);
-
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.Source);
-                Console.WriteLine(ex.StackTrace);
-            }
-
-        }
+        
     }
 }

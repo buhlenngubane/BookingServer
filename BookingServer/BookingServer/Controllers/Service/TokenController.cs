@@ -7,7 +7,6 @@ using BookingServer.Models.Users;
 using BookingServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -35,9 +34,6 @@ namespace BookingServer.Controllers.Service
         public async Task<IActionResult> SignIn()
         {
             var user = await _context.User.SingleOrDefaultAsync(m => m.UserId.Equals(int.Parse(User.Identity.Name)));
-            //User sendUser = new User(user.Name,user.Email);
-            user.Password = "";
-            //var userName = User.Identity.Name;
             return Ok(user);
         }
 
@@ -100,7 +96,7 @@ namespace BookingServer.Controllers.Service
                 return response;
 
             }
-            return Error("ModelState error!");
+            return BadRequest(ModelState);
         }
 
         [HttpPost, Authorize]
@@ -113,7 +109,7 @@ namespace BookingServer.Controllers.Service
                 return Ok("LoggedOut:)");
             }
 
-            return Error("ModelState error! Not LoggedOut.");
+            return BadRequest("ModelState error! Not LoggedOut. " + ModelState);
         }
 
         private string BuildToken(User user)
@@ -147,7 +143,8 @@ namespace BookingServer.Controllers.Service
             }
             catch(Exception ex)
             {
-                return "Error occured: "+ex;
+                Console.WriteLine("Token error: " + ex);
+                throw ex;
             }
         }
 

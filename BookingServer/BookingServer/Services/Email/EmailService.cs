@@ -12,7 +12,7 @@ namespace BookingServer.Services.Email
 
         public EmailService(IEmailConfiguration emailConfiguration)
         {
-            _emailConfiguration = emailConfiguration;
+            _emailConfiguration = emailConfiguration; 
         }
 
         public List<EmailMessage> ReceiveEmail(int maxCount = 10)

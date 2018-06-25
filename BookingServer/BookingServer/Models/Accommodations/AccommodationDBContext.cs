@@ -12,7 +12,7 @@ namespace BookingServer.Models.Accommodations
         public virtual DbSet<Property> Property { get; set; }
 
         public AccommodationDBContext(DbContextOptions<AccommodationDBContext> options)
-                    : base(options)
+                            : base(options)
         {
             Database.EnsureCreated();
         }
@@ -37,18 +37,28 @@ namespace BookingServer.Models.Accommodations
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.HasOne(d => d.Prop)
+                entity.HasOne(d => d.Detail)
                     .WithMany(p => p.AccBooking)
-                    .HasForeignKey(d => d.PropId)
+                    .HasForeignKey(d => d.DetailId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_AccBooking_Property");
+                    .HasConstraintName("FK_AccBooking_AccDetail");
             });
 
             modelBuilder.Entity<AccDetail>(entity =>
             {
                 entity.HasKey(e => e.DetailId);
 
-                entity.Property(e => e.DateAvailable).HasColumnType("date");
+                entity.Property(e => e.DateAvailableFrom).HasColumnType("date");
+
+                entity.Property(e => e.DateAvailableTo).HasColumnType("date");
+
+                entity.Property(e => e.PropertyAttr)
+                    .IsRequired()
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RoomType)
+                    .IsRequired()
+                    .IsUnicode(false);
 
                 entity.HasOne(d => d.Prop)
                     .WithMany(p => p.AccDetail)

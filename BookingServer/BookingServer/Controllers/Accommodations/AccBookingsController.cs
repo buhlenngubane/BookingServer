@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using BookingServer.Services;
 using BookingServer.Models;
+using BookingServer.Models.Email;
+using BookingServer.Services.Email;
 
 namespace BookingServer.Controllers.Accommodations
 {
@@ -19,12 +21,17 @@ namespace BookingServer.Controllers.Accommodations
     public class AccBookingsController : Controller
     {
         private readonly AccommodationDBContext _context;
+        private readonly UserDBContext _userDB;
+        private readonly IEmailConfiguration _emailConfiguration;
         private IHubContext<Booking_Notify, ITypedHubClient> _hubContext;
 
-        public AccBookingsController(AccommodationDBContext context, 
+        public AccBookingsController(AccommodationDBContext context,
+            UserDBContext userDB, IEmailConfiguration emailConfiguration,
             IHubContext<Booking_Notify, ITypedHubClient> hubContext)
         {
             _context = context;
+            _userDB = userDB;
+            _emailConfiguration = emailConfiguration;
             _hubContext = hubContext;
         }
 
@@ -41,9 +48,9 @@ namespace BookingServer.Controllers.Accommodations
         public async Task<IActionResult> GetBooking([FromRoute] int PropId)
         {
 
-            if (_context.AccBooking.ToList().Exists(m=>m.PropId.Equals(PropId)))
+            if (_context.AccBooking.ToList().Exists(m=>m.Detail.PropId.Equals(PropId)))
             {
-                var user = _context.AccBooking.Where(m => m.PropId.Equals(PropId));
+                var user = _context.AccBooking.Where(m => m.Detail.PropId.Equals(PropId));
                 Console.WriteLine("Users" + user);
                 return Ok(await user.ToListAsync());
             }
@@ -115,42 +122,73 @@ namespace BookingServer.Controllers.Accommodations
             {
                 return BadRequest(ModelState);
             }
-            Console.WriteLine("UIYHFufyfugygkif");
-            Console.WriteLine(User.Identity.AuthenticationType);
 
-            if (User.Identity.Name.Equals(booking.UserId.ToString()) || User.IsInRole("Administrator"))
+            if (User.Identity.Name.Equals(booking.UserId.ToString()) || User.IsInRole("Admin"))
                 try
                 {
-                
-                _context.AccBooking.Add(booking);
-                // await _context.SaveChangesAsync();
 
-                    var detail = _context.AccDetail.SingleOrDefault(s => s.PropId.Equals(booking.PropId));
-
-                    detail.AvailableRooms -= 1;
-
-                    _context.Entry(detail).State = EntityState.Modified;
-
+                    _context.AccBooking.Add(booking);
                     await _context.SaveChangesAsync();
+
+                    /// Need to inner join details inorder to create receipt
+
+                    var detail = _context.AccDetail.Where(s => s.DetailId.Equals(booking.DetailId))
+                                    .Include(s=>s.Prop).Include(s=>s.Prop.Acc);
+
+                    var user = await _userDB.User.SingleOrDefaultAsync(s => s.UserId.Equals(booking.UserId));
+
+                    if (detail.First().AvailableRooms > 0)
+                        detail.First().AvailableRooms -= 1;
+                    
+
+                    Console.WriteLine("Available rooms should be 5: "+detail.First().AvailableRooms);
+                    
+                    if (await TryUpdateModelAsync<AccDetail>(detail.First()))
+                    {
+                        try
+                        {
+                            await _context.SaveChangesAsync();
+                        }
+                        catch (DbUpdateException  ex)
+                        {
+                            Console.WriteLine(ex);
+                            return BadRequest("Unchanged");
+                        }
+                    }
+
+                    EmailMessage message = new EmailMessage("Accomodation Booking.",
+                        "Hi " + user.Name + ",<br/><br/>" +
+                        "You have just booked for an accommodation using our a web services, the full details of the booking are: <br/>" +
+                        detail.First().Prop.Acc.Country + "<br/>" + detail.First().Prop.Acc.Location + "<br/>" +
+                        detail.First().Prop.PropName + "<br/>Booking date: " + booking.BookDate + "<br/>Nummber of nights booked: " +
+                        booking.NumOfNights + "<br/>Total: R " + booking.Total +
+                        "<br/><br/>Kind Regards,\nBooking.com");
+
+                    message.FromAddresses.Add(new EmailAddress("BookingServer.com", "validtest.r.me@gmail.com"));
+                    message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
+
+                    Send send = new Send(message, _emailConfiguration);
+                    await send.To(message, _emailConfiguration);
 
                     await _hubContext.Clients.All.BroadcastMessage("A user has just book for "
                         + _context.Property
-                        .Where(m => m.PropId.Equals(booking.PropId))
-                        .Select(s => s.PropName) + ", " + detail.AvailableRooms + " left.");
+                        .Where(m => m.PropId.Equals(booking.Detail.PropId))
+                        .Select(s => s.PropName) + ", " + detail.First().AvailableRooms + " left.");
 
                     return CreatedAtAction("GetBooking", new { id = booking.BookingId }, booking);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error: " + ex);
+                    Console.WriteLine("Error: " + ex.InnerException);
+                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.Source);
+                    Console.WriteLine(ex.StackTrace);
+                    Console.WriteLine(ex.TargetSite);
                     //Console.WriteLine(booking.PropId + " total" + booking.Total);
-                    return Json("Internal error.");
+                    return BadRequest("Internal error.");
                 }
-
             
-
             return Unauthorized();
-            
         }
 
         // DELETE: api/Bookings/5

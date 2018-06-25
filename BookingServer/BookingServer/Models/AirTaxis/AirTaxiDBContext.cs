@@ -13,7 +13,7 @@ namespace BookingServer.Models.AirTaxis
         public virtual DbSet<Taxi> Taxi { get; set; }
 
         public AirTaxiDBContext(DbContextOptions<AirTaxiDBContext> options)
-                            : base(options)
+                                    : base(options)
         {
             Database.EnsureCreated();
         }
@@ -39,6 +39,11 @@ namespace BookingServer.Models.AirTaxis
                     .IsUnicode(false);
 
                 entity.Property(e => e.ReturnJourney).HasColumnType("datetime");
+
+                entity.Property(e => e.TaxiName)
+                    .IsRequired()
+                    .IsUnicode(false)
+                    .HasDefaultValueSql("('Taxi')");
 
                 entity.HasOne(d => d.AirDetail)
                     .WithMany(p => p.AirBooking)

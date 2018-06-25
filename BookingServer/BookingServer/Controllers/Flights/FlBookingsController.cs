@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Flights;
 using Microsoft.AspNetCore.Authorization;
+using BookingServer.Models.Email;
+using BookingServer.Services.Email;
+using BookingServer.Models.Users;
 
 namespace BookingServer.Controllers.Flights
 {
@@ -15,10 +18,15 @@ namespace BookingServer.Controllers.Flights
     public class FlBookingsController : Controller
     {
         private readonly FlightDBContext _context;
+        private readonly UserDBContext _userDB;
+        private readonly IEmailConfiguration _emailConfiguration;
 
-        public FlBookingsController(FlightDBContext context)
+        public FlBookingsController(FlightDBContext context,
+            UserDBContext userDB, IEmailConfiguration emailConfiguration)
         {
             _context = context;
+            _userDB = userDB;
+            _emailConfiguration = emailConfiguration;
         }
 
         // GET: api/FlBookings
@@ -26,23 +34,6 @@ namespace BookingServer.Controllers.Flights
         public IEnumerable<FlBooking> GetAll()
         {
             return _context.FlBooking;
-        }
-
-        [HttpGet("{DetailId}"), Authorize(Policy = "Administrator")]
-        public async Task<IActionResult> GetBooking([FromRoute] int DetailId)
-        {
-
-            if (_context.FlBooking.ToList().Exists(m => m.DetailId.Equals(DetailId)))
-            {
-                var user = _context.FlBooking.Where(m => m.DetailId.Equals(DetailId));
-                Console.WriteLine("Users" + user);
-                return Ok(await user.ToListAsync());
-            }
-
-            if (_context.FlBooking.Any(m => m.DetailId.Equals(DetailId)))
-                return NotFound(DetailId + ", not yet booked");
-            else
-                return BadRequest();
         }
 
         // GET: api/FlBookings/5
@@ -54,7 +45,7 @@ namespace BookingServer.Controllers.Flights
                 return BadRequest(ModelState);
             }
 
-            if (User.Identity.Name.Equals(id.ToString()))
+            if (User.Identity.Name.Equals(id.ToString()) || User.IsInRole("Admin"))
             {
                 
                 if (_context.FlBooking.ToList().Exists(m => m.UserId.Equals(id)))
@@ -114,19 +105,36 @@ namespace BookingServer.Controllers.Flights
                 return BadRequest(ModelState);
             }
 
-            if (User.Identity.Name.Equals(flBooking.UserId.ToString()))
+            if (User.Identity.Name.Equals(flBooking.UserId.ToString()) || User.IsInRole("Admin"))
             {
                 try
                 {
+                    var user = await _userDB.User.SingleOrDefaultAsync(s => s.UserId.Equals(flBooking.UserId));
+                    var detail = _context.FlightDetail.Where(s => s.DetailId.Equals(flBooking.DetailId))
+                        .Include(s => s.Dest).Include(s => s.Dest.Flight);
                     _context.FlBooking.Add(flBooking);
                     await _context.SaveChangesAsync();
+                    // EmailAddress address = new EmailAddress();
+                    var Return = flBooking.ReturnDate.HasValue ? flBooking.ReturnDate : null;
 
+                    EmailMessage message = new EmailMessage("Flight Booking", "Hi " + user.Name + ",<br/><br/>" +
+                        "You have just booked for a flight using our a web services, the full details of the booking are: <br/>" +
+                        detail.First().Dest.Flight.Locale + "<br/>" + detail.First().Dest.Destination1 + "<br/>" +
+                        flBooking.FlightType + "<br/>" + "Booked date for departure: " + flBooking.BookDate +
+                        "<br/>Departure time: " + detail.First().Departure.Split(' ')[1] + "<br/>" +
+                        Return != null? "ReturnTrip date: " + Return + "<br/>PayType: " + flBooking.PayType: "<br/>PayType: " + flBooking.PayType +
+                        "<br/>Number of travellers: " + flBooking.Travellers + "<br/>Total: R" + flBooking.Total +
+                        "<br/><br/>Kind Regards,\nBooking.com");
+
+                    message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
+                    message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
+                    Send send = new Send(message, _emailConfiguration);
                     return CreatedAtAction("GetFlBooking", new { id = flBooking.BookDate }, flBooking);
                 }
                 catch(Exception ex)
                 {
                     Console.WriteLine(ex);
-                    return Json("Internal error");
+                    return BadRequest("Internal error");
                 }
             }
 
@@ -158,5 +166,7 @@ namespace BookingServer.Controllers.Flights
         {
             return _context.FlBooking.Any(e => e.BookingId == id);
         }
+
+        
     }
 }

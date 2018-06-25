@@ -21,7 +21,7 @@
   },
   "redis": {
     "connectionString": "localhost",
-    "expiryTime": "20"
+    "AbortOnConnectFail": "false"
   },
 
   "EmailConfiguration": {

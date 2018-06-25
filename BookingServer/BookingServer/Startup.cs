@@ -22,143 +22,154 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace BookingServer
 {
     public class Startup
     {
-        private static IConfiguration Configuration { get; set; }
+         private static IConfiguration _Configuration { get; set; }
+        
 
-        public Startup()
+        public Startup(IConfiguration configuration)
         {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsetings.json");
-            Configuration = config.Build();
+            _Configuration = configuration;
         }
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<JwtSettings>(Configuration.GetSection("JWTSettings"))
-                .Configure<Redis>(Configuration.GetSection("redis"));
-
-            services.AddAuthentication(options=> 
+            try
             {
-                try
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                }
-                catch(Exception ex)
-                {
-                    Debug.WriteLine(ex);
-                    Console.WriteLine("Authentication failed: "+ex);
-                }
+                services.Configure<JwtSettings>(_Configuration.GetSection("JWTSettings"))
+                    .Configure<Redis>(_Configuration.GetSection("redis"));
 
-            })
-                .AddJwtBearer(options =>
+                services.AddAuthentication(options =>
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
+                    try
                     {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = Configuration["JWTSettings:Issuer"],
-                        ValidAudience = Configuration["JWTSettings:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWTSettings:SecretKey"]))
-                    };
-                    options.Events = new JwtBearerEvents
+                        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    }
+                    catch (Exception ex)
                     {
-                        OnAuthenticationFailed = context =>
+                        Debug.WriteLine(ex);
+                        Console.WriteLine("Authentication failed: " + ex);
+                    }
+
+                })
+                    .AddJwtBearer(options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
                         {
-                            
-                            Console.WriteLine("OnAuthenticationFailed: " +
-                                context.Exception.Message);
-                            return Task.CompletedTask;
-                        },
-                        OnTokenValidated = context =>
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+                            ValidIssuer = _Configuration["JWTSettings:Issuer"],
+                            ValidAudience = _Configuration["JWTSettings:Audience"],
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_Configuration["JWTSettings:SecretKey"]))
+                        };
+                        options.Events = new JwtBearerEvents
                         {
-                            Console.WriteLine("OnTokenValidated: " +
-                                context.SecurityToken);
-                            return Task.CompletedTask;
-                        }
-                    };
-                }
-             );
+                            OnAuthenticationFailed = context =>
+                            {
 
-            
+                                Console.WriteLine("OnAuthenticationFailed: " +
+                                    context.Exception.Message);
+                                return Task.CompletedTask;
+                            },
+                            OnTokenValidated = context =>
+                            {
+                                Console.WriteLine("OnTokenValidated: " +
+                                    context.SecurityToken);
+                                return Task.CompletedTask;
+                            }
+                        };
+                    }
+                 );
 
-            services.AddLogging();
 
-            services.AddTransient<TokenManagerMiddleware>();
+
+                services.AddLogging();
+
+                services.AddTransient<TokenManagerMiddleware>();
                 //.AddTransient<PropDetailMiddleware>()
-                
-            services.AddTransient<ITokenManager, TokenManager>();
 
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+                services.AddTransient<ITokenManager, TokenManager>();
 
-            services.AddDistributedRedisCache(r => { r.Configuration = Configuration["redis:connectionString"]; });
+                services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("Administrator",
-                    policy => policy.RequireRole("Admin")
-                    );
-
-            });
-
-            services.AddCors(options =>
+                services.AddDistributedRedisCache(r =>
                 {
-                    options.AddPolicy("ClientDomain",
-                        builder =>
-                        {
-                            builder.WithOrigins(Configuration["Client:AngularSite"])
-                            .AllowAnyMethod().AllowAnyHeader().AllowCredentials();
-                        });
-                }
-            );
 
-            services.AddDbContext<UserDBContext>(
-                options =>
-                options.UseSqlServer(Configuration.GetConnectionString("UserDatabase"))
-            );
+                    r.Configuration = _Configuration["redis:connectionString"] + ",abortConnect = " + _Configuration["redis:AbortOnConnectFail"];
+                });
 
-            services.AddDbContext<AccommodationDBContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("AccommodationDatabase"))
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy("Administrator",
+                        policy => policy.RequireRole("Admin")
+                        );
 
-            );
+                });
 
-            services.AddDbContext<FlightDBContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("FlightDatabase"))
-            );
-
-            services.AddDbContext<CarRentalDBContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("CarRentalDatabase"))
-            );
-
-            services.AddDbContext<AirTaxiDBContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("AirTaxiDatabase"))
-            );
-
-            services.AddMvc()
-                .AddJsonOptions(
-                    options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+                services.AddCors(options =>
+                    {
+                        options.AddPolicy("ClientDomain",
+                            builder =>
+                            {
+                                builder.WithOrigins(_Configuration["Client:AngularSite"])
+                                .AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                            });
+                    }
                 );
 
-            services.AddSwaggerGen(c =>
+                services.AddDbContext<UserDBContext>(
+                    options =>
+                    options.UseSqlServer(_Configuration.GetConnectionString("UserDatabase"))
+                );
+
+                services.AddDbContext<AccommodationDBContext>(options =>
+                    options.UseSqlServer(_Configuration.GetConnectionString("AccommodationDatabase"))
+
+                );
+
+                services.AddDbContext<FlightDBContext>(options =>
+                    options.UseSqlServer(_Configuration.GetConnectionString("FlightDatabase"))
+                );
+
+                services.AddDbContext<CarRentalDBContext>(options =>
+                    options.UseSqlServer(_Configuration.GetConnectionString("CarRentalDatabase"))
+                );
+
+                services.AddDbContext<AirTaxiDBContext>(options =>
+                    options.UseSqlServer(_Configuration.GetConnectionString("AirTaxiDatabase"))
+                );
+
+                services.AddMvc()
+                    .AddJsonOptions(
+                        options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+                    );
+
+                services.AddSwaggerGen(c =>
+                {
+                    c.SwaggerDoc("v1", new Info { Title = "Booking Server", Version = "v1" });
+                    c.OperationFilter<AddAuthTokenHeaderParam>();
+                });
+
+                services.AddSignalR();
+
+                services.AddSingleton<IEmailConfiguration>(_Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>());
+
+                services.AddTransient<IEmailService, EmailService>();
+            }
+            catch (Exception ex)
             {
-                c.SwaggerDoc("v1", new Info { Title = "Booking Server", Version = "v1" });
-                c.OperationFilter<AddAuthTokenHeaderParam>();
-            });
-
-            services.AddSignalR();
-
-            services.AddSingleton<IEmailConfiguration>(Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>());
-
-            services.AddTransient<IEmailService, EmailService>();
+                // Log.Fatal(ex, "Host services not loaded!");
+                Console.WriteLine(ex);
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

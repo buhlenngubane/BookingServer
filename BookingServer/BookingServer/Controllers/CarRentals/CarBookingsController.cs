@@ -9,6 +9,8 @@ using BookingServer.Models.CarRentals;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using BookingServer.Models.Users;
+using BookingServer.Services.Email;
+using BookingServer.Models.Email;
 
 namespace BookingServer.Controllers.CarRentals
 {
@@ -18,12 +20,14 @@ namespace BookingServer.Controllers.CarRentals
     {
         private readonly CarRentalDBContext _context;
         private readonly UserDBContext _usersDBContext;
+        private readonly IEmailConfiguration _emailConfiguration;
 
         public CarBookingsController(CarRentalDBContext context, 
-            UserDBContext userDBContext)
+            UserDBContext userDBContext, IEmailConfiguration emailConfiguration)
         {
             _context = context;
             _usersDBContext = userDBContext;
+            _emailConfiguration = emailConfiguration;
         }
 
         // GET: api/CarBookings
@@ -31,25 +35,6 @@ namespace BookingServer.Controllers.CarRentals
         public IEnumerable<CarBooking> GetCarBooking()
         {
             return _context.CarBooking;
-        }
-
-        [HttpGet("{CarId}"), Authorize(Policy = "Administrator")]
-        public async Task<IActionResult> GetBooking([FromRoute] int CarId)
-        {
-
-            if (_context.CarBooking.ToList().Exists(m => m.CarId.Equals(CarId)))
-            {
-                var user = _context.CarBooking.Where(m => m.CarId.Equals(CarId));
-                Console.WriteLine("Users" + user);
-                return Ok(await user.ToListAsync());
-            }
-
-            //Console.WriteLine("Should be true "+_context.Accommodation.Any(m => m.AccId.Equals(PropId)));
-
-            if (_context.CarBooking.Any(m => m.CarId.Equals(CarId)))
-                return NotFound(CarId + ", not yet booked");
-            else
-                return BadRequest();
         }
 
         // GET: api/CarBookings/5
@@ -61,7 +46,7 @@ namespace BookingServer.Controllers.CarRentals
                 return BadRequest(ModelState);
             }
 
-            if (User.Identity.Name.Equals(id.ToString()))
+            if (User.Identity.Name.Equals(id.ToString()) || User.IsInRole("Admin"))
             {
 
                 if (_context.CarBooking.ToList().Exists(m => m.UserId.Equals(id)))
@@ -122,19 +107,34 @@ namespace BookingServer.Controllers.CarRentals
                 return BadRequest(ModelState);
             }
 
-            if (User.Identity.Name.Equals(carBooking.UserId.ToString()))
+            if (User.Identity.Name.Equals(carBooking.UserId.ToString()) || User.IsInRole("Admin"))
             {
                 try
                 {
+                    var user = await _usersDBContext.User.SingleOrDefaultAsync(s =>
+                    s.UserId.Equals(carBooking.UserId));
+                    var detail = _context.Car.Where(s => s.CarId.Equals(carBooking.CarId))
+                        .Include(s => s.Cmp).Include(s => s.Cmp.Crent).Include(s => s.Ctype);
                     _context.CarBooking.Add(carBooking);
                     await _context.SaveChangesAsync();
+                    // EmailAddress address = new EmailAddress();
 
-                    return CreatedAtAction("GetCarBooking", new { id = carBooking.BookingId }, carBooking);
+                    EmailMessage message = new EmailMessage("Flight Booking", "Hi " + user.Name + ",<br/><br/>" +
+                        "You have just booked for a car using our a web services, the full details of the booking are: <br/>" +
+                        detail.First().Ctype.Name + "<br/>" + detail.First().Cmp.CompanyName + "<br/>" +
+                        "<br/>" + "Booked date for pickUp: " + carBooking.BookDate +
+                        "<br/>PayType: " + carBooking.PayType + "<br/>Total: R" + carBooking.Total +
+                        "<br/><br/>Kind Regards,\nBooking.com");
+
+                    message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
+                    message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
+                    Send send = new Send(message, _emailConfiguration);
+                    return CreatedAtAction("GetFlBooking", new { id = carBooking.BookDate }, carBooking);
                 }
                 catch(Exception ex)
                 {
                     Console.WriteLine(ex);
-                    return Json("Internal error.");
+                    return BadRequest("Internal error.");
                 }
             }
 

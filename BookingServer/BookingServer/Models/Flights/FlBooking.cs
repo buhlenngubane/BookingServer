@@ -10,6 +10,7 @@ namespace BookingServer.Models.Flights
         public int DetailId { get; set; }
         public string FlightType { get; set; }
         public DateTime BookDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
         public int Travellers { get; set; }
         public string PayType { get; set; }
         public bool PayStatus { get; set; }

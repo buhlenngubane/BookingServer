@@ -36,19 +36,29 @@ namespace BookingServer.Controllers.Flights
         }
 
         // GET: api/FlightDetails/5
-        [HttpGet("{destString}")]
-        public async Task<IActionResult> GetFlightDetail([FromRoute] string destString)
+        [HttpGet]//("{locale}&{destination}&{departureDate}.{returnDate?}")]
+        public async Task<IActionResult> GetFlightDetail([FromQuery] string locale,
+            string destination, string departureDate, string returnDate)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            
 
-            var flightDetail = _context.FlightDetail.Include(c=>c.C)
+            var flightDetail = returnDate == null ?
+            _context.FlightDetail.Include(c => c.C)
+                .Include(c => c.Dest)
+                .Where(m => m.Dest.Flight.Locale.Equals(locale) &&
+                m.Dest.Destination1.Equals(destination) && m.Departure.Substring(0,10).Equals(departureDate)) :
+            _context.FlightDetail.Include(c=>c.C)
                 .Include(c=>c.Dest)
-                .Where(m => m.Dest.Destination1.Equals(destString));
+                .Where(m => m.Dest.Flight.Locale.Equals(locale) &&
+                m.Dest.Destination1.Equals(destination) &&
+                m.Departure.Substring(0, 10).Equals(departureDate) &&
+                m.ReturnTrip.Substring(0, 10).Equals(returnDate));
 
-            if (flightDetail == null)
+            if (!flightDetail.Any())
             {
                 return NotFound();
             }
