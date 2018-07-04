@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,8 @@ namespace BookingServer.Services
 
                 return;
             }
-            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            if(context.Request.Headers.TryGetValue("Authorization", out StringValues value))
+                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
         }
     }
 }

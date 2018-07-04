@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Flights;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingServer.Controllers.Flights
 {
@@ -48,28 +49,29 @@ namespace BookingServer.Controllers.Flights
         }
 
         // PUT: api/Flights/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutFlight([FromRoute] int id, [FromBody] Flight flight)
+        [HttpPut, Authorize(Policy = "Administrator")]
+        public async Task<IActionResult> PutFlight([FromBody] Flight flight)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != flight.FlightId)
+            /*if (id != flight.FlightId)
             {
                 return BadRequest();
-            }
+            }*/
 
-            _context.Entry(flight).State = EntityState.Modified;
+            // _context.Entry(flight).State = EntityState.Modified;
 
             try
             {
+                _context.Flight.Update(flight);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!FlightExists(id))
+                if (!FlightExists(flight.FlightId))
                 {
                     return NotFound();
                 }
@@ -83,7 +85,7 @@ namespace BookingServer.Controllers.Flights
         }
 
         // POST: api/Flights
-        [HttpPost]
+        [HttpPost, Authorize(Policy = "Administrator")]
         public async Task<IActionResult> PostFlight([FromBody] Flight flight)
         {
             if (!ModelState.IsValid)
@@ -108,7 +110,7 @@ namespace BookingServer.Controllers.Flights
         }
 
         // DELETE: api/Flights/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize(Policy = "Administrator")]
         public async Task<IActionResult> DeleteFlight([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -122,10 +124,20 @@ namespace BookingServer.Controllers.Flights
                 return NotFound();
             }
 
-            _context.Flight.Remove(flight);
-            await _context.SaveChangesAsync();
+            try { 
+                _context.Flight.Remove(flight);
+                await _context.SaveChangesAsync();
 
-            return Ok(flight);
+                return Ok(flight);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine();
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.Source);
+                Console.WriteLine(ex.StackTrace);
+                return BadRequest();
+            }
         }
 
         private bool FlightExists(int id)

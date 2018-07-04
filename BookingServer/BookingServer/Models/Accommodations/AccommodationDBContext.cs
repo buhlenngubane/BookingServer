@@ -12,7 +12,7 @@ namespace BookingServer.Models.Accommodations
         public virtual DbSet<Property> Property { get; set; }
 
         public AccommodationDBContext(DbContextOptions<AccommodationDBContext> options)
-                            : base(options)
+            : base(options)
         {
             try
             {
@@ -47,7 +47,6 @@ namespace BookingServer.Models.Accommodations
                 entity.HasOne(d => d.Detail)
                     .WithMany(p => p.AccBooking)
                     .HasForeignKey(d => d.DetailId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_AccBooking_AccDetail");
             });
 
@@ -70,7 +69,6 @@ namespace BookingServer.Models.Accommodations
                 entity.HasOne(d => d.Prop)
                     .WithMany(p => p.AccDetail)
                     .HasForeignKey(d => d.PropId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_AccDetail_Property");
             });
 
@@ -105,7 +103,6 @@ namespace BookingServer.Models.Accommodations
                 entity.HasOne(d => d.Acc)
                     .WithMany(p => p.Property)
                     .HasForeignKey(d => d.AccId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Property_Accommodation");
             });
         }

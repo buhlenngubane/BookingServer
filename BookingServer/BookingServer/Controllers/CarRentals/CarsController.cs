@@ -28,10 +28,41 @@ namespace BookingServer.Controllers.CarRentals
             return _context.Car;
         }
 
-        [HttpGet, Authorize(Policy="Administrator")]
-        public IEnumerable<Car> GetAllCars()
+        [HttpGet("{id}"), Authorize(Policy="Administrator")]
+        public async Task<IActionResult> GetAllCars([FromRoute] int id)
         {
-            return _context.Car.Include(s => s.Cmp.Crent).Include(s => s.Ctype).Include(s => s.CarBooking);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var carRental = _context.Car.Where(s => s.Cmp.Crent.CrentId.Equals(id))
+                    .Include(s=>s.CarBooking)
+                    .Include(s=>s.Cmp)
+                        .ThenInclude(s=>s.Crent)
+                    .Include(s=>s.Ctype);
+
+                if (!carRental.Any())
+                    return Ok("No carRental for id " + id);
+
+                foreach(Car c in carRental)
+                {
+                    c.Ctype.Picture = null;
+                    c.Cmp.Picture = null;
+                    c.Cmp.Crent.Ccompany = null;
+                    c.Ctype.Car = null;
+                    c.Cmp.Car = null;
+                }
+
+                return Ok(await carRental.ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest();
+            }
         }
 
         // GET: api/Cars/5

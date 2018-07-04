@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.AirTaxis;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingServer.Controllers.AirTaxis
 {
@@ -65,7 +66,7 @@ namespace BookingServer.Controllers.AirTaxis
         }
 
         // PUT: api/AirTaxiDropOffs/5
-        [HttpPut("{id}")]
+        [HttpPut("{id}"), Authorize(Policy = "Administrator")]
         public async Task<IActionResult> PutAirTaxiDropOff([FromRoute] int id, [FromBody] AirTaxiDropOff airTaxiDropOff)
         {
             if (!ModelState.IsValid)
@@ -100,7 +101,7 @@ namespace BookingServer.Controllers.AirTaxis
         }
 
         // POST: api/AirTaxiDropOffs
-        [HttpPost]
+        [HttpPost, Authorize(Policy = "Administrator")]
         public async Task<IActionResult> PostAirTaxiDropOff([FromBody] AirTaxiDropOff airTaxiDropOff)
         {
             if (!ModelState.IsValid)
@@ -108,14 +109,22 @@ namespace BookingServer.Controllers.AirTaxis
                 return BadRequest(ModelState);
             }
 
-            _context.AirTaxiDropOff.Add(airTaxiDropOff);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.AirTaxiDropOff.Add(airTaxiDropOff);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAirTaxiDropOff", new { id = airTaxiDropOff.DropOffId }, airTaxiDropOff);
+                return CreatedAtAction("GetAirTaxiDropOff", new { id = airTaxiDropOff.DropOffId }, airTaxiDropOff);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest();
+            }
         }
 
         // DELETE: api/AirTaxiDropOffs/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize(Policy = "Administrator")]
         public async Task<IActionResult> DeleteAirTaxiDropOff([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -123,16 +132,24 @@ namespace BookingServer.Controllers.AirTaxis
                 return BadRequest(ModelState);
             }
 
-            var airTaxiDropOff = await _context.AirTaxiDropOff.SingleOrDefaultAsync(m => m.DropOffId == id);
-            if (airTaxiDropOff == null)
+            try
             {
-                return NotFound();
+                var airTaxiDropOff = await _context.AirTaxiDropOff.SingleOrDefaultAsync(m => m.DropOffId == id);
+                if (airTaxiDropOff == null)
+                {
+                    return NotFound();
+                }
+
+                _context.AirTaxiDropOff.Remove(airTaxiDropOff);
+                await _context.SaveChangesAsync();
+
+                return Ok(airTaxiDropOff);
             }
-
-            _context.AirTaxiDropOff.Remove(airTaxiDropOff);
-            await _context.SaveChangesAsync();
-
-            return Ok(airTaxiDropOff);
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest();
+            }
         }
 
         private bool AirTaxiDropOffExists(int id)

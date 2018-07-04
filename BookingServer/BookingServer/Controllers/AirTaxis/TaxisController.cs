@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.AirTaxis;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingServer.Controllers.AirTaxis
 {
@@ -47,7 +48,7 @@ namespace BookingServer.Controllers.AirTaxis
         }
 
         // PUT: api/Taxis/5
-        [HttpPut("{id}")]
+        [HttpPut("{id}"), Authorize(Policy = "Administrator")]
         public async Task<IActionResult> PutTaxi([FromRoute] int id, [FromBody] Taxi taxi)
         {
             if (!ModelState.IsValid)
@@ -82,7 +83,7 @@ namespace BookingServer.Controllers.AirTaxis
         }
 
         // POST: api/Taxis
-        [HttpPost]
+        [HttpPost, Authorize(Policy = "Administrator")]
         public async Task<IActionResult> PostTaxi([FromBody] Taxi taxi)
         {
             if (!ModelState.IsValid)
@@ -97,7 +98,7 @@ namespace BookingServer.Controllers.AirTaxis
         }
 
         // DELETE: api/Taxis/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize(Policy = "Administrator")]
         public async Task<IActionResult> DeleteTaxi([FromRoute] int id)
         {
             if (!ModelState.IsValid)

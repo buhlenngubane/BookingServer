@@ -13,7 +13,7 @@ namespace BookingServer.Models.Flights
         public virtual DbSet<FlightDetail> FlightDetail { get; set; }
 
         public FlightDBContext(DbContextOptions<FlightDBContext> options)
-                                                    : base(options)
+                            : base(options)
         {
             try
             {
@@ -38,23 +38,19 @@ namespace BookingServer.Models.Flights
             {
                 entity.HasKey(e => e.DestId);
 
-                entity.Property(e => e.Destination1)
+                entity.Property(e => e.Dest)
                     .IsRequired()
-                    .HasColumnName("Destination")
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.Flight)
                     .WithMany(p => p.Destination)
                     .HasForeignKey(d => d.FlightId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Destination_Flight");
             });
 
             modelBuilder.Entity<FlBooking>(entity =>
             {
                 entity.HasKey(e => e.BookingId);
-
-                entity.Property(e => e.BookingId).ValueGeneratedNever();
 
                 entity.Property(e => e.BookDate).HasColumnType("date");
 
@@ -70,10 +66,17 @@ namespace BookingServer.Models.Flights
 
                 entity.Property(e => e.ReturnDate).HasColumnType("date");
 
+                entity.Property(e => e.TravellersNames)
+                    .HasColumnName("Travellers_Names")
+                    .IsUnicode(false);
+
+                entity.Property(e => e.TravellersSurnames)
+                    .HasColumnName("Travellers_Surnames")
+                    .IsUnicode(false);
+
                 entity.HasOne(d => d.Detail)
                     .WithMany(p => p.FlBooking)
                     .HasForeignKey(d => d.DetailId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_FlBooking_Flight_Detail");
             });
 
@@ -125,13 +128,11 @@ namespace BookingServer.Models.Flights
                 entity.HasOne(d => d.C)
                     .WithMany(p => p.FlightDetail)
                     .HasForeignKey(d => d.Cid)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Flight_Detail_FlCompany");
 
                 entity.HasOne(d => d.Dest)
                     .WithMany(p => p.FlightDetail)
                     .HasForeignKey(d => d.DestId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Flight_Detail_Destination");
             });
         }

@@ -19,7 +19,7 @@ namespace BookingServer
 
         public static void Main(string[] args)
         {
-            ColumnOptions columnOptions = new ColumnOptions();
+            /*ColumnOptions columnOptions = new ColumnOptions();
             columnOptions.Store.Add(StandardColumn.LogEvent);
 
             Log.Logger = new LoggerConfiguration()
@@ -32,9 +32,9 @@ namespace BookingServer
 
             try
             {
-                Log.Information("Getting the motors running...");
+                Log.Information("Getting the motors running...");*/
                 BuildWebHost(args).Run();
-            }
+            /*}
             catch (Exception ex)
             {
                 Log.Fatal(ex, "Host terminated unexpectedly");
@@ -42,7 +42,7 @@ namespace BookingServer
             finally
             {
                 Log.CloseAndFlush();
-            }
+            }*/
         }
 
         public static IWebHost BuildWebHost(string[] args) =>
@@ -57,7 +57,7 @@ namespace BookingServer
                     .AddJsonFile("appsetings.json", optional: false, reloadOnChange: true)
                     .AddEnvironmentVariables();
                 })
-                .UseSerilog()
+                // .UseSerilog()
                 .Build();
     }
 }

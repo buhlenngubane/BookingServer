@@ -48,31 +48,6 @@ namespace BookingServer.Controllers.Accommodations
 
             return Ok();
         }
-        
-
-        [HttpGet("{Country}")]
-        public async Task<IActionResult> SpecificCountry([FromRoute] string Country)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var accommodation = from m in _context.Accommodation
-                           select m;
-
-            if (!String.IsNullOrEmpty(Country))
-            {
-                accommodation = accommodation.Where(s => s.Country.Contains(Country));
-            }
-
-            if (!accommodation.Any())
-            {
-                return NotFound();
-            }
-
-            return Ok(await accommodation.ToListAsync());
-        }
 
         // PUT: api/Accommodations
         [HttpPut, Authorize(Policy ="Administrator")]
@@ -85,7 +60,8 @@ namespace BookingServer.Controllers.Accommodations
 
             try
             {
-                _context.Entry(accommodation).State = EntityState.Modified;
+                //_context.Entry(accommodation).State = EntityState.Modified;
+                _context.Accommodation.Update(accommodation);
                 Console.WriteLine("State change, yet to save.");
                 await _context.SaveChangesAsync();
                 Console.WriteLine("Saved.");
@@ -100,6 +76,11 @@ namespace BookingServer.Controllers.Accommodations
                 {
                     Console.WriteLine("Error updating: " + ex);
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest();
             }
 
             return NoContent();
@@ -142,23 +123,34 @@ namespace BookingServer.Controllers.Accommodations
         [HttpDelete("{id}"), Authorize(Policy = "Administrator")]
         public async Task<IActionResult> DeleteAccommodation([FromRoute] int id)
         {
-            if (!ModelState.IsValid || !id.Equals(1))
+            if (!ModelState.IsValid)
             {
-                return !ModelState.IsValid? 
-                    BadRequest(ModelState): BadRequest("Not admin.");
+                return  
+                    BadRequest(ModelState);
             }
 
-            var accommodation = await 
-                _context.Accommodation.SingleOrDefaultAsync(m => m.AccId == id);
-            if (accommodation == null)
+            try
             {
-                return NotFound();
+                var accommodation = await
+                    _context.Accommodation.SingleOrDefaultAsync(m => m.AccId == id);
+                if (accommodation == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Accommodation.Remove(accommodation);
+                await _context.SaveChangesAsync();
+
+                return Ok(accommodation);
             }
-
-            _context.Accommodation.Remove(accommodation);
-            await _context.SaveChangesAsync();
-
-            return Ok(accommodation);
+            catch(Exception ex)
+            {
+                Console.WriteLine();
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.Source);
+                Console.WriteLine(ex.StackTrace);
+                return BadRequest();
+            }
         }
 
         private bool AccommodationExists(int id)

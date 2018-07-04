@@ -12,6 +12,8 @@ namespace BookingServer.Models.Flights
         public DateTime BookDate { get; set; }
         public DateTime? ReturnDate { get; set; }
         public int Travellers { get; set; }
+        public string TravellersNames { get; set; }
+        public string TravellersSurnames { get; set; }
         public string PayType { get; set; }
         public bool PayStatus { get; set; }
         public int Total { get; set; }

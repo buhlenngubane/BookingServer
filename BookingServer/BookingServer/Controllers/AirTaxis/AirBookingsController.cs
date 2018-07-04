@@ -73,7 +73,8 @@ namespace BookingServer.Controllers.AirTaxis
 
                 if (_context.AirBooking.ToList().Exists(m => m.UserId.Equals(id)))
                 {
-                    var user = _context.AirBooking.Where(m => m.UserId.Equals(id));
+                    var user = _context.AirBooking.Where(m => m.UserId.Equals(id)).Include(s=>s.AirDetail)
+                        .ThenInclude(s=>s.Taxi);
                     Console.WriteLine("Users" + user);
                     return Ok(await user.ToListAsync());
                 }
@@ -139,18 +140,19 @@ namespace BookingServer.Controllers.AirTaxis
                     await _context.SaveChangesAsync();
                     // EmailAddress address = new EmailAddress();
                     var Return = airBooking.ReturnJourney.HasValue ? airBooking.ReturnJourney : null;
+                    var str = Return != null ? "ReturnTrip date: " + Return + "<br/>PayType: " + airBooking.PayType : "<br/>PayType: " + airBooking.PayType;
 
-                    EmailMessage message = new EmailMessage("Flight Booking", "Hi " + user.Name + ",<br/><br/>" +
+                    EmailMessage message = new EmailMessage("AirTaxi Booking", "Hi " + user.Name + ",<br/><br/>" +
                         "You have just booked for a taxi using our a web services, the full details of the booking are: <br/>" +
                         detail.First().DropOff.PickUp.PickUp + "<br/>" + detail.First().DropOff.DropOff + "<br/>" +
                         airBooking.TaxiName + "<br/>" + "Booked date for pickUp: " + airBooking.BookDate +
-                        Return != null ? "ReturnTrip date: " + Return + "<br/>PayType: " + airBooking.PayType : "<br/>PayType: " + airBooking.PayType +
+                        str +
                         "<br/>Number of passengers: " + airBooking.Passengers + "<br/>Total: R" + airBooking.Total +
                         "<br/><br/>Kind Regards,<br/>Booking.com");
 
                     message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
-                    Send send = new Send(message, _emailConfiguration);
+                    await new Send(message, _emailConfiguration).To(message, _emailConfiguration);
                     return CreatedAtAction("GetFlBooking", new { id = airBooking.BookDate }, airBooking);
                 }
                 catch (Exception ex)

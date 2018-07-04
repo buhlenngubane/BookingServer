@@ -51,7 +51,8 @@ namespace BookingServer.Controllers.CarRentals
 
                 if (_context.CarBooking.ToList().Exists(m => m.UserId.Equals(id)))
                 {
-                    var user = _context.CarBooking.Where(m => m.UserId.Equals(id));
+                    var user = _context.CarBooking.Where(m => m.UserId.Equals(id)).Include(s=>s.Car)
+                        .ThenInclude(s=>s.Ctype);
                     Console.WriteLine("Users" + user);
                     return Ok(await user.ToListAsync());
                 }
@@ -119,7 +120,7 @@ namespace BookingServer.Controllers.CarRentals
                     await _context.SaveChangesAsync();
                     // EmailAddress address = new EmailAddress();
 
-                    EmailMessage message = new EmailMessage("Flight Booking", "Hi " + user.Name + ",<br/><br/>" +
+                    EmailMessage message = new EmailMessage("Car Booking", "Hi " + user.Name + ",<br/><br/>" +
                         "You have just booked for a car using our a web services, the full details of the booking are: <br/>" +
                         detail.First().Ctype.Name + "<br/>" + detail.First().Cmp.CompanyName + "<br/>" +
                         "<br/>" + "Booked date for pickUp: " + carBooking.BookDate +
@@ -128,7 +129,7 @@ namespace BookingServer.Controllers.CarRentals
 
                     message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
-                    Send send = new Send(message, _emailConfiguration);
+                    await new Send(message, _emailConfiguration).To(message, _emailConfiguration);
                     return CreatedAtAction("GetFlBooking", new { id = carBooking.BookDate }, carBooking);
                 }
                 catch(Exception ex)

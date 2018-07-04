@@ -49,7 +49,9 @@ namespace BookingServer.Controllers.Flights
                 
                 if (_context.FlBooking.ToList().Exists(m => m.UserId.Equals(id)))
                 {
-                    var user = _context.FlBooking.Where(m => m.UserId.Equals(id));
+                    var user = _context.FlBooking.Where(m => m.UserId.Equals(id)).Include(s=>s.Detail)
+                        .ThenInclude(s=>s.Dest)
+                        .ThenInclude(s=>s.Flight);
                     Console.WriteLine("Users" + user);
                     return Ok(await user.ToListAsync());
                 }
@@ -115,19 +117,31 @@ namespace BookingServer.Controllers.Flights
                     await _context.SaveChangesAsync();
                     // EmailAddress address = new EmailAddress();
                     var Return = flBooking.ReturnDate.HasValue ? flBooking.ReturnDate : null;
+                    var names = flBooking.TravellersNames.Split(',');
+                    var surnames = flBooking.TravellersSurnames.Split(',');
+                    string split = user.Name + " " + user.Surname + "<br/>";
+                    int index = 0;
+                    if (names.Any())
+                        foreach(string n in names)
+                        {
+                            split += n + " " + surnames[index++] + "<br/>";
+                        }
+
+                    var str = Return != null ? "ReturnTrip date: " + Return + "<br/>PayType: " + flBooking.PayType : "<br/>PayType: " + flBooking.PayType;
 
                     EmailMessage message = new EmailMessage("Flight Booking", "Hi " + user.Name + ",<br/><br/>" +
                         "You have just booked for a flight using our a web services, the full details of the booking are: <br/>" +
-                        detail.First().Dest.Flight.Locale + "<br/>" + detail.First().Dest.Destination1 + "<br/>" +
+                        detail.First().Dest.Flight.Locale + "<br/>" + detail.First().Dest.Dest + "<br/>" +
                         flBooking.FlightType + "<br/>" + "Booked date for departure: " + flBooking.BookDate +
                         "<br/>Departure time: " + detail.First().Departure.Split(' ')[1] + "<br/>" +
-                        Return != null? "ReturnTrip date: " + Return + "<br/>PayType: " + flBooking.PayType: "<br/>PayType: " + flBooking.PayType +
-                        "<br/>Number of travellers: " + flBooking.Travellers + "<br/>Total: R" + flBooking.Total +
+                         str +
+                        "<br/>Number of travellers: " + flBooking.Travellers +
+                        "<br/>Travellers names are:<br/>" + split + "<br/>Total: R" + flBooking.Total +
                         "<br/><br/>Kind Regards,<br/>Booking.com");
 
                     message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
-                    Send send = new Send(message, _emailConfiguration);
+                    await new Send(message, _emailConfiguration).To(message, _emailConfiguration);
                     return CreatedAtAction("GetFlBooking", new { id = flBooking.BookDate }, flBooking);
                 }
                 catch(Exception ex)

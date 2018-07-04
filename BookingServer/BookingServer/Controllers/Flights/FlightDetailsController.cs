@@ -28,11 +28,42 @@ namespace BookingServer.Controllers.Flights
             return _context.FlightDetail;
         }
 
-        [HttpGet, Authorize(Policy = "Administrator")]
-        public IEnumerable<FlightDetail> GetAllDetails()
+        [HttpGet("{id}"), Authorize(Policy = "Administrator")]
+        public async Task<IActionResult> GetAllDetails([FromRoute] int id)
         {
-            return _context.FlightDetail.Include(s => s.Dest.Flight)
-                .Include(s => s.C).Include(s => s.FlBooking);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var flight = _context.FlightDetail.Where(s => s.Dest.Flight.FlightId.Equals(id))
+                    .Include(s=>s.FlBooking)
+                    .Include(s=>s.C)
+                    .Include(s=>s.Dest)
+                        .ThenInclude(s=>s.Flight);
+
+                if (!flight.Any())
+                    return Ok("No flights for id " + id);
+
+                
+                foreach(FlightDetail n in flight)
+                {
+                    n.C.Picture = null;
+                    n.C.FlightDetail = null;
+                    n.Dest.Flight.Destination = null;
+                    n.Dest.FlightDetail = null;
+                    //flight.Except(n.)
+                }
+
+                return Ok(await flight.ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest();
+            }
         }
 
         // GET: api/FlightDetails/5
@@ -50,11 +81,12 @@ namespace BookingServer.Controllers.Flights
             _context.FlightDetail.Include(c => c.C)
                 .Include(c => c.Dest)
                 .Where(m => m.Dest.Flight.Locale.Equals(locale) &&
-                m.Dest.Destination1.Equals(destination) && m.Departure.Substring(0,10).Equals(departureDate)) :
+                m.Dest.Dest.Equals(destination) &&
+                m.Departure.Substring(0,10).Equals(departureDate)) :
             _context.FlightDetail.Include(c=>c.C)
                 .Include(c=>c.Dest)
                 .Where(m => m.Dest.Flight.Locale.Equals(locale) &&
-                m.Dest.Destination1.Equals(destination) &&
+                m.Dest.Dest.Equals(destination) &&
                 m.Departure.Substring(0, 10).Equals(departureDate) &&
                 m.ReturnTrip.Substring(0, 10).Equals(returnDate));
 

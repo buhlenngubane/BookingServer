@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.AirTaxis;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingServer.Controllers.AirTaxis
 {
@@ -47,28 +48,29 @@ namespace BookingServer.Controllers.AirTaxis
         }
 
         // PUT: api/AirTaxiPickUps/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAirTaxiPickUp([FromRoute] int id, [FromBody] AirTaxiPickUp airTaxiPickUp)
+        [HttpPut, Authorize(Policy = "Administrator")]
+        public async Task<IActionResult> PutAirTaxiPickUp([FromBody] AirTaxiPickUp airTaxiPickUp)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != airTaxiPickUp.PickUpId)
+            /*if (id != airTaxiPickUp.PickUpId)
             {
                 return BadRequest();
-            }
+            }*/
 
-            _context.Entry(airTaxiPickUp).State = EntityState.Modified;
+            // _context.Entry(airTaxiPickUp).State = EntityState.Modified;
 
             try
             {
+                _context.AirTaxiPickUp.Update(airTaxiPickUp);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AirTaxiPickUpExists(id))
+                if (!AirTaxiPickUpExists(airTaxiPickUp.PickUpId))
                 {
                     return NotFound();
                 }
@@ -82,7 +84,7 @@ namespace BookingServer.Controllers.AirTaxis
         }
 
         // POST: api/AirTaxiPickUps
-        [HttpPost]
+        [HttpPost, Authorize(Policy = "Administrator")]
         public async Task<IActionResult> PostAirTaxiPickUp([FromBody] AirTaxiPickUp airTaxiPickUp)
         {
             if (!ModelState.IsValid)
@@ -102,13 +104,14 @@ namespace BookingServer.Controllers.AirTaxis
                 Console.WriteLine(ex.Message);
                 Console.WriteLine(ex.StackTrace);
                 Console.WriteLine(ex.Source);
+                Console.WriteLine(ex.Data);
 
-                return BadRequest(ex.Message);
+                return BadRequest(ex.Source);
             }
         }
 
         // DELETE: api/AirTaxiPickUps/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize(Policy = "Administrator")]
         public async Task<IActionResult> DeleteAirTaxiPickUp([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -116,16 +119,39 @@ namespace BookingServer.Controllers.AirTaxis
                 return BadRequest(ModelState);
             }
 
-            var airTaxiPickUp = await _context.AirTaxiPickUp.SingleOrDefaultAsync(m => m.PickUpId == id);
-            if (airTaxiPickUp == null)
+            try
             {
-                return NotFound();
+
+                var airTaxiPickUp = await _context.AirTaxiPickUp
+                    .SingleOrDefaultAsync(s=>s.PickUpId.Equals(id))
+                    ;
+
+                //var lst = airTaxiPickUp.AirTaxiDropOff.ToList();
+
+                if (airTaxiPickUp == null)
+                {
+                    return NotFound();
+                }
+
+                //airTaxiPickUp.AirTaxiDropOff.Clear();
+                
+                // _context.AirTaxiDropOff.RemoveRange(airTaxiPickUp.AirTaxiDropOff);
+                _context.AirTaxiPickUp.Remove(airTaxiPickUp);
+                await _context.SaveChangesAsync();
+                return Ok(airTaxiPickUp);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine();
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.Source);
+                Console.WriteLine(ex.StackTrace);
+                // Console.WriteLine($"  SaveChanges threw " +
+                   // $"{ex.GetType().Name}: {(ex is DbUpdateException ? ex.InnerException.Message : ex.Message)}");
+                return BadRequest();
             }
 
-            _context.AirTaxiPickUp.Remove(airTaxiPickUp);
-            await _context.SaveChangesAsync();
-
-            return Ok(airTaxiPickUp);
+            
         }
 
         private bool AirTaxiPickUpExists(int id)

@@ -28,30 +28,22 @@ namespace BookingServer.Controllers.Flights
         }
 
         // GET: api/FlCompanies/5
-        [HttpGet("{ids}")]
-        public async Task<IActionResult> GetFlCompany([FromRoute] string ids)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetFlCompany([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            List < FlCompany> flCompany = new List<FlCompany>();
+            var company = await _context.FlCompany.SingleOrDefaultAsync(m => m.Cid == id);
 
-            var value = ids?.Split(",").Select(int.Parse).ToArray();
-
-            foreach (int id in value)
+            if (company == null)
             {
-
-                flCompany.Add( await _context.FlCompany.SingleOrDefaultAsync(m => m.Cid == id));
+                return Ok("No company found with id " + id);
             }
 
-            if (flCompany == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(flCompany);
+            return Ok(company);
         }
 
         // PUT: api/FlCompanies/5

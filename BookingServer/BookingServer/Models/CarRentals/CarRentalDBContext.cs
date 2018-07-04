@@ -13,13 +13,13 @@ namespace BookingServer.Models.CarRentals
         public virtual DbSet<Ccompany> Ccompany { get; set; }
 
         public CarRentalDBContext(DbContextOptions<CarRentalDBContext> options)
-                    : base(options)
+            : base(options)
         {
             try
             {
                 Database.EnsureCreated();
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 Console.WriteLine(ex);
             }
@@ -41,13 +41,11 @@ namespace BookingServer.Models.CarRentals
                 entity.HasOne(d => d.Cmp)
                     .WithMany(p => p.Car)
                     .HasForeignKey(d => d.CmpId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Car_CCompany");
 
                 entity.HasOne(d => d.Ctype)
                     .WithMany(p => p.Car)
                     .HasForeignKey(d => d.CtypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Car_CarType");
             });
 
@@ -67,7 +65,6 @@ namespace BookingServer.Models.CarRentals
                 entity.HasOne(d => d.Car)
                     .WithMany(p => p.CarBooking)
                     .HasForeignKey(d => d.CarId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_CarBooking_Car");
             });
 
@@ -135,7 +132,6 @@ namespace BookingServer.Models.CarRentals
                 entity.HasOne(d => d.Crent)
                     .WithMany(p => p.Ccompany)
                     .HasForeignKey(d => d.CrentId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_CCompany_CarRental");
             });
         }

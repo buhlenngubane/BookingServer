@@ -166,7 +166,7 @@ namespace BookingServer
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, " Host services not loaded!");
+                // Log.Fatal(ex, " Host services not loaded!");
                 Console.WriteLine(ex);
             }
         }

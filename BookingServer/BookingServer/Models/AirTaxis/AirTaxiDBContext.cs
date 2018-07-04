@@ -13,7 +13,7 @@ namespace BookingServer.Models.AirTaxis
         public virtual DbSet<Taxi> Taxi { get; set; }
 
         public AirTaxiDBContext(DbContextOptions<AirTaxiDBContext> options)
-                                    : base(options)
+                                            : base(options)
         {
             try
             {
@@ -55,7 +55,6 @@ namespace BookingServer.Models.AirTaxis
                 entity.HasOne(d => d.AirDetail)
                     .WithMany(p => p.AirBooking)
                     .HasForeignKey(d => d.AirDetailId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_AirBooking_AirDetail");
             });
 
@@ -68,13 +67,11 @@ namespace BookingServer.Models.AirTaxis
                 entity.HasOne(d => d.DropOff)
                     .WithMany(p => p.AirDetail)
                     .HasForeignKey(d => d.DropOffId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_AirDetail_AirTaxiDropOff");
 
                 entity.HasOne(d => d.Taxi)
                     .WithMany(p => p.AirDetail)
                     .HasForeignKey(d => d.TaxiId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_AirDetail_Taxi");
             });
 
@@ -89,7 +86,6 @@ namespace BookingServer.Models.AirTaxis
                 entity.HasOne(d => d.PickUp)
                     .WithMany(p => p.AirTaxiDropOff)
                     .HasForeignKey(d => d.PickUpId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_AirTaxiDropOff_AirTaxiPickUp");
             });
 

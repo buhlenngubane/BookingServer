@@ -70,7 +70,8 @@ namespace BookingServer.Controllers.Accommodations
             {
                 if (_context.AccBooking.ToList().Exists(m => m.UserId.Equals(id)))
                 {
-                    var user = _context.AccBooking.Where(m => m.UserId.Equals(id));
+                    var user = _context.AccBooking.Where(m => m.UserId.Equals(id)).Include(s=>s.Detail)
+                        .ThenInclude(s=>s.Prop).ThenInclude(s=>s.Acc);
                     Console.WriteLine("Users" + user);
                     return Ok(await user.ToListAsync());
                 }
@@ -154,19 +155,18 @@ namespace BookingServer.Controllers.Accommodations
                         }
                     }
 
-                    EmailMessage message = new EmailMessage("Accomodation Booking.",
+                    EmailMessage message = new EmailMessage("Accommodation Booking.",
                         "Hi " + user.Name + ",<br/><br/>" +
                         "You have just booked for an accommodation using our a web services, the full details of the booking are: <br/>" +
                         detail.First().Prop.Acc.Country + "<br/>" + detail.First().Prop.Acc.Location + "<br/>" +
-                        detail.First().Prop.PropName + "<br/>Booking date: " + booking.BookDate + "<br/>Nummber of nights booked: " +
+                        detail.First().Prop.PropName + "<br/>Booking date: " + booking.BookDate + "<br/>Number of nights booked: " +
                         booking.NumOfNights + "<br/>Total: R " + booking.Total +
                         "<br/><br/>Kind Regards,<br/>Booking.com");
 
                     message.FromAddresses.Add(new EmailAddress("BookingServer.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
 
-                    Send send = new Send(message, _emailConfiguration);
-                    await send.To(message, _emailConfiguration);
+                    await new Send(message, _emailConfiguration).To(message, _emailConfiguration);
 
                     await _hubContext.Clients.All.BroadcastMessage("A user has just book for "
                         + _context.Property

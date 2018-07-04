@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.CarRentals;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingServer.Controllers.CarRentals
 {
@@ -27,22 +28,6 @@ namespace BookingServer.Controllers.CarRentals
             return _context.CarRental;
         }
 
-        /*[HttpGet("{search}")]
-        public async Task<IActionResult> Find([FromRoute] string search)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var carRental = await _context.Include(c=>c.Ccompany).SingleOrDefaultAsync(m => m.Location.Equals(search));
-
-            if (carRental.Equals(null))
-                return NotFound();
-
-            return Ok(carRental);
-        }*/
-
         // GET: api/CarRentals/5
         [HttpGet("{searchString?}")]
         public async Task<IActionResult> Search([FromRoute] string searchString)
@@ -63,28 +48,29 @@ namespace BookingServer.Controllers.CarRentals
         }
 
         // PUT: api/CarRentals/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCarRental([FromRoute] int id, [FromBody] CarRental carRental)
+        [HttpPut, Authorize(Policy = "Administrator")]
+        public async Task<IActionResult> PutCarRental([FromBody] CarRental carRental)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != carRental.CrentId)
+            /*if (id != carRental.CrentId)
             {
                 return BadRequest();
-            }
+            }*/
 
-            _context.Entry(carRental).State = EntityState.Modified;
+            // _context.Entry(carRental).State = EntityState.Modified;
 
             try
             {
+                _context.CarRental.Update(carRental);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CarRentalExists(id))
+                if (!CarRentalExists(carRental.CrentId))
                 {
                     return NotFound();
                 }
@@ -98,7 +84,7 @@ namespace BookingServer.Controllers.CarRentals
         }
 
         // POST: api/CarRentals
-        [HttpPost]
+        [HttpPost, Authorize(Policy = "Administrator")]
         public async Task<IActionResult> PostCarRental([FromBody] CarRental carRental)
         {
             if (!ModelState.IsValid)
@@ -124,7 +110,7 @@ namespace BookingServer.Controllers.CarRentals
         }
 
         // DELETE: api/CarRentals/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize(Policy ="Administrator")]
         public async Task<IActionResult> DeleteCarRental([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -137,11 +123,22 @@ namespace BookingServer.Controllers.CarRentals
             {
                 return NotFound();
             }
+            try
+            {
 
-            _context.CarRental.Remove(carRental);
-            await _context.SaveChangesAsync();
+                _context.CarRental.Remove(carRental);
+                await _context.SaveChangesAsync();
 
-            return Ok(carRental);
+                return Ok(carRental);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine();
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.Source);
+                Console.WriteLine(ex.StackTrace);
+                return BadRequest();
+            }
         }
 
         private bool CarRentalExists(int id)

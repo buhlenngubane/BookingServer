@@ -28,11 +28,38 @@ namespace BookingServer.Controllers.AirTaxis
             return _context.AirDetail;
         }
 
-        [HttpGet, Authorize(Policy = "Administrator")]
-        public IEnumerable<AirDetail> GetAllDetails()
+        [HttpGet("{id}"), Authorize(Policy = "Administrator")]
+        public async Task<IActionResult> GetDetails([FromRoute] int id)
         {
-            return _context.AirDetail.Include(s => s.DropOff.PickUp)
-                .Include(s => s.Taxi).Include(s => s.AirBooking);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var airTaxi = _context.AirDetail.Where(s => s.DropOff.PickUp.PickUpId.Equals(id))
+                    .Include(s=>s.AirBooking)
+                    .Include(s=>s.Taxi)
+                    .Include(s=>s.DropOff)
+                        .ThenInclude(s=>s.PickUp);
+
+                if (!airTaxi.Any())
+                    return Ok("No airTaxi for id " + id);
+
+                foreach(AirDetail detail in airTaxi)
+                {
+                    detail.DropOff.PickUp.AirTaxiDropOff = null;
+                    detail.DropOff.AirDetail = null;
+                    detail.Taxi.AirDetail = null;
+                }
+
+                return Ok(await airTaxi.ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest();
+            }
         }
 
         // GET: api/AirDetails/5
@@ -56,7 +83,7 @@ namespace BookingServer.Controllers.AirTaxis
         }
 
         // PUT: api/AirDetails/5
-        [HttpPut("{id}")]
+        [HttpPut("{id}"), Authorize(Policy = "Administrator")]
         public async Task<IActionResult> PutAirDetail([FromRoute] int id, [FromBody] AirDetail airDetail)
         {
             if (!ModelState.IsValid)
@@ -91,7 +118,7 @@ namespace BookingServer.Controllers.AirTaxis
         }
 
         // POST: api/AirDetails
-        [HttpPost]
+        [HttpPost, Authorize(Policy = "Administrator")]
         public async Task<IActionResult> PostAirDetail([FromBody] AirDetail airDetail)
         {
             if (!ModelState.IsValid)
@@ -106,7 +133,7 @@ namespace BookingServer.Controllers.AirTaxis
         }
 
         // DELETE: api/AirDetails/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize(Policy = "Administrator")]
         public async Task<IActionResult> DeleteAirDetail([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -114,16 +141,32 @@ namespace BookingServer.Controllers.AirTaxis
                 return BadRequest(ModelState);
             }
 
-            var airDetail = await _context.AirDetail.SingleOrDefaultAsync(m => m.AirDetailId == id);
-            if (airDetail == null)
+            try
             {
-                return NotFound();
+                var airDetail = _context.AirDetail.Where(m => m.DropOff.PickUp.PickUpId.Equals(id))
+                    .Include(s=>s.AirBooking)
+                    .Include(s=>s.DropOff)
+                    .ThenInclude(s=>s.PickUp);
+                var airPickUps = _context.AirTaxiPickUp.Where(s => s.PickUpId.Equals(id));
+                // var join = airPickUps.Join(airDetail,s=>s.PickUpId.Equals(airDetail.))
+                if (!airDetail.Any())
+                {
+                    return NotFound();
+                }
+
+
+                // _context.AirTaxiPickUp.RemoveRange((AirTaxiPickUp)airDetail);
+                await _context.SaveChangesAsync();
+
+                return Ok(airDetail);
             }
-
-            _context.AirDetail.Remove(airDetail);
-            await _context.SaveChangesAsync();
-
-            return Ok(airDetail);
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.Source);
+                Console.WriteLine(ex.StackTrace);
+                return BadRequest();
+            }
         }
 
         private bool AirDetailExists(int id)

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace BookingServer.Controllers.Accommodations
 {
     [Produces("application/json")]
-    [Route("api/AccDetails")]
+    [Route("api/AccDetails/[action]")]
     public class AccDetailsController : Controller
     {
         private readonly AccommodationDBContext _context;
@@ -22,13 +22,13 @@ namespace BookingServer.Controllers.Accommodations
 
         // GET: api/AccDetails
         [HttpGet]
-        public IEnumerable<AccDetail> GetAccDetail()
+        public IEnumerable<AccDetail> GetAccDetails()
         {
             return _context.AccDetail;
         }
 
         // GET: api/AccDetails/5
-        [HttpGet("{id}")]
+        [HttpGet("{id}"), Authorize(Policy = "Administrator")]
         public async Task<IActionResult> GetAccDetail([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -36,14 +36,31 @@ namespace BookingServer.Controllers.Accommodations
                 return BadRequest(ModelState);
             }
 
-            var accDetail = await _context.AccDetail.SingleOrDefaultAsync(m => m.DetailId == id);
-
-            if (accDetail == null)
+            try
             {
-                return NotFound();
-            }
+                var accommodation = _context.AccDetail.Where(s => s.Prop.Acc.AccId.Equals(id))
+                    .Include(s=>s.AccBooking)
+                    .Include(s=>s.Prop)
+                        .ThenInclude(s=>s.Acc);
 
-            return Ok(accDetail);
+                if (!accommodation.Any())
+                    return Ok("No accommodation for id " + id);
+
+                foreach(AccDetail detail in accommodation)
+                {
+                    detail.Prop.Picture = null;
+                    detail.Prop.Acc.Picture = null;
+                    detail.Prop.Acc.Property = null;
+                    detail.Prop.AccDetail = null;
+                }
+                    
+                return Ok(await accommodation.ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest();
+            }
         }
 
         // PUT: api/AccDetails/5
@@ -76,6 +93,11 @@ namespace BookingServer.Controllers.Accommodations
                 {
                     throw;
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest();
             }
 
             return NoContent();

@@ -12,7 +12,7 @@ namespace BookingServer.Models.Flights
 
         public int DestId { get; set; }
         public int FlightId { get; set; }
-        public string Destination1 { get; set; }
+        public string Dest { get; set; }
 
         public Flight Flight { get; set; }
         public ICollection<FlightDetail> FlightDetail { get; set; }

@@ -28,11 +28,28 @@ namespace BookingServer.Controllers.Accommodations
             return _context.Property;
         }
 
-        [HttpGet, Authorize(Policy = "Administrator")]
-        public IEnumerable<Property> GetAllProperties()
+        [HttpGet("{id}"), Authorize(Policy = "Administrator")]
+        public async Task<IActionResult> GetAllProperties([FromRoute] int id)
         {
-            return _context.Property.Include(s => s.Acc).Include(s => s.AccDetail);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var accommodation = _context.AccDetail.Where(s => s.Prop.Acc.AccId.Equals(id))
+                    .Include(s => s.Prop).Include(s => s.Prop.Acc).Include(s=>s.AccBooking);
+
+                return Ok(await accommodation.ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest();
+            }
         }
+
 
         [HttpGet("{country}&{location}")]
         public async Task<IActionResult> GetProperties([FromRoute] string country, string location)
@@ -53,11 +70,23 @@ namespace BookingServer.Controllers.Accommodations
                     var Country = _context.Property.Include(s => s.AccDetail).Where(m => m.Acc.Country.Equals(country));
 
                     if (Country.Any())
+                    {
+                        foreach(Property p in Country)
+                        {
+                            p.Acc.Property = null;
+                        }
                         return Ok(await Country.ToListAsync());
+                    }
                 }
 
                 return NotFound();
             }
+
+            /*foreach(Property p in @property)
+            {
+                p.AccDetail = null;
+                foreach(AccDetail ac)
+            }*/
 
             return Ok(await @property.ToListAsync());
         }
@@ -88,6 +117,11 @@ namespace BookingServer.Controllers.Accommodations
                 {
                     Console.WriteLine("Error updating: " + ex);
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest();
             }
 
             return NoContent();
