@@ -108,6 +108,10 @@ namespace BookingServer.Controllers.Accommodations
                     Console.WriteLine("Error updating: " + ex);
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
 
             return NoContent();
         }
@@ -150,8 +154,15 @@ namespace BookingServer.Controllers.Accommodations
                         }
                         catch (DbUpdateException  ex)
                         {
-                            Console.WriteLine(ex);
-                            return BadRequest("Unchanged");
+                            throw ex;
+                            //Console.WriteLine(ex);
+                            //return BadRequest("Unchanged");
+                        }
+                        catch (Exception ex)
+                        {
+                            // Console.WriteLine(ex);
+                            throw ex;
+                            //return BadRequest("Internal error!");
                         }
                     }
 
@@ -166,7 +177,8 @@ namespace BookingServer.Controllers.Accommodations
                     message.FromAddresses.Add(new EmailAddress("BookingServer.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
 
-                    await new Send(message, _emailConfiguration).To(message, _emailConfiguration);
+                    new Send(message, _emailConfiguration)// .To(message, _emailConfiguration)
+                        ;
 
                     await _hubContext.Clients.All.BroadcastMessage("A user has just book for "
                         + _context.Property

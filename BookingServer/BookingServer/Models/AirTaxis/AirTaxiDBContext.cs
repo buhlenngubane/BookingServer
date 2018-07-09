@@ -13,7 +13,7 @@ namespace BookingServer.Models.AirTaxis
         public virtual DbSet<Taxi> Taxi { get; set; }
 
         public AirTaxiDBContext(DbContextOptions<AirTaxiDBContext> options)
-                                            : base(options)
+                                                    : base(options)
         {
             try
             {
@@ -100,10 +100,6 @@ namespace BookingServer.Models.AirTaxis
 
             modelBuilder.Entity<Taxi>(entity =>
             {
-                entity.Property(e => e.DriverPolicy)
-                    .IsRequired()
-                    .IsUnicode(false);
-
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .IsUnicode(false);

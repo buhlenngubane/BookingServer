@@ -83,7 +83,7 @@ namespace BookingServer.Controllers.CarRentals
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException uex)
             {
                 if (!CarBookingExists(id))
                 {
@@ -91,8 +91,12 @@ namespace BookingServer.Controllers.CarRentals
                 }
                 else
                 {
-                    throw;
+                    throw uex;
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
 
             return NoContent();
@@ -129,7 +133,8 @@ namespace BookingServer.Controllers.CarRentals
 
                     message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
-                    await new Send(message, _emailConfiguration).To(message, _emailConfiguration);
+                    new Send(message, _emailConfiguration)//.To(message, _emailConfiguration)
+                        ;
                     return CreatedAtAction("GetFlBooking", new { id = carBooking.BookDate }, carBooking);
                 }
                 catch(Exception ex)

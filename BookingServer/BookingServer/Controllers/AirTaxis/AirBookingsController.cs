@@ -105,7 +105,7 @@ namespace BookingServer.Controllers.AirTaxis
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException uex)
             {
                 if (!AirBookingExists(id))
                 {
@@ -113,8 +113,12 @@ namespace BookingServer.Controllers.AirTaxis
                 }
                 else
                 {
-                    throw;
+                    throw uex;
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
 
             return NoContent();
@@ -152,7 +156,8 @@ namespace BookingServer.Controllers.AirTaxis
 
                     message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
-                    await new Send(message, _emailConfiguration).To(message, _emailConfiguration);
+                    new Send(message, _emailConfiguration)//.To(message, _emailConfiguration)
+                        ;
                     return CreatedAtAction("GetFlBooking", new { id = airBooking.BookDate }, airBooking);
                 }
                 catch (Exception ex)

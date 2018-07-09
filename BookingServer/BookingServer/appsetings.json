@@ -21,7 +21,7 @@
   },
   "redis": {
     "connectionString": "localhost",
-    "AbortOnConnectFail": "false"
+    "AbortOnConnectFail": "False"
   },
 
   "EmailConfiguration": {

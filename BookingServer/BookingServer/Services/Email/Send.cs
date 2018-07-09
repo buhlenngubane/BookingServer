@@ -13,12 +13,6 @@ namespace BookingServer.Services.Email
     {
         public Send(EmailMessage emailMessage, IEmailConfiguration emailConfiguration)
         {
-            
-
-        }
-
-        public async Task<bool> To(EmailMessage emailMessage, IEmailConfiguration emailConfiguration)
-        {
             try
             {
 
@@ -48,7 +42,7 @@ namespace BookingServer.Services.Email
 
                     emailClient.Disconnect(true);
 
-                    return emailClient.IsConnected;
+                    // return emailClient.IsConnected;
                 }
             }
             catch (Exception ex)
@@ -56,9 +50,15 @@ namespace BookingServer.Services.Email
                 Console.WriteLine(ex.Message);
                 Console.WriteLine(ex.Source);
                 Console.WriteLine(ex.StackTrace);
-                return false;
+                // return false;
             }
 
         }
+
+        /*public async Task<bool> To(EmailMessage emailMessage, IEmailConfiguration emailConfiguration)
+        {
+            
+
+        }*/
     }
 }
