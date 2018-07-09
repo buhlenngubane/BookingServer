@@ -54,8 +54,10 @@ namespace BookingServer
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine(ex);
+                        /// Debug.WriteLine(ex);
                         Console.WriteLine("Authentication failed: " + ex);
+                        Log.Fatal("Add Authentication failed: " + ex);
+                        throw ex;
                     }
 
                 })
@@ -92,7 +94,7 @@ namespace BookingServer
 
 
 
-                services.AddLogging();
+                // services.AddLogging();
 
                 services.AddTransient<TokenManagerMiddleware>();
 
@@ -111,7 +113,6 @@ namespace BookingServer
                     options.AddPolicy("Administrator",
                         policy => policy.RequireRole("Admin")
                         );
-
                 });
 
                 services.AddCors(options =>
@@ -166,7 +167,7 @@ namespace BookingServer
             }
             catch (Exception ex)
             {
-                // Log.Fatal(ex, " Host services not loaded!");
+                Log.Fatal(ex, " Host services not loaded!");
                 Console.WriteLine(ex);
             }
         }

@@ -83,7 +83,7 @@ namespace BookingServer.Controllers.CarRentals
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException uex)
             {
                 if (!CarBookingExists(id))
                 {
@@ -91,8 +91,12 @@ namespace BookingServer.Controllers.CarRentals
                 }
                 else
                 {
-                    throw;
+                    throw uex;
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
 
             return NoContent();

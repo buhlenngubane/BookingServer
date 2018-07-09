@@ -108,6 +108,10 @@ namespace BookingServer.Controllers.Accommodations
                     Console.WriteLine("Error updating: " + ex);
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
 
             return NoContent();
         }
@@ -150,8 +154,15 @@ namespace BookingServer.Controllers.Accommodations
                         }
                         catch (DbUpdateException  ex)
                         {
-                            Console.WriteLine(ex);
-                            return BadRequest("Unchanged");
+                            throw ex;
+                            //Console.WriteLine(ex);
+                            //return BadRequest("Unchanged");
+                        }
+                        catch (Exception ex)
+                        {
+                            // Console.WriteLine(ex);
+                            throw ex;
+                            //return BadRequest("Internal error!");
                         }
                     }
 

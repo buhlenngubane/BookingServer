@@ -105,7 +105,7 @@ namespace BookingServer.Controllers.AirTaxis
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException uex)
             {
                 if (!AirBookingExists(id))
                 {
@@ -113,8 +113,12 @@ namespace BookingServer.Controllers.AirTaxis
                 }
                 else
                 {
-                    throw;
+                    throw uex;
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
 
             return NoContent();

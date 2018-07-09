@@ -82,7 +82,7 @@ namespace BookingServer.Controllers.Flights
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException uex)
             {
                 if (!FlBookingExists(id))
                 {
@@ -90,8 +90,12 @@ namespace BookingServer.Controllers.Flights
                 }
                 else
                 {
-                    throw;
+                    throw uex;
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
 
             return NoContent();
