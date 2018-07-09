@@ -1,17 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace BookingServer.Models.AirTaxis
 {
     public partial class Taxi
     {
-        public int TaxiId { get; set; }
-        public int AirId { get; set; }
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public int Price { get; set; }
-        public string PicDirectory { get; set; }
+        public Taxi()
+        {
+            AirDetail = new HashSet<AirDetail>();
+        }
 
-        public AirTaxi Air { get; set; }
+        public int TaxiId { get; set; }
+        [Required]
+        public string Name { get; set; }
+        [Required]
+        public string Type { get; set; }
+        [Required]
+        [RegularExpression("[1-9]{1}[0-9]*", ErrorMessage = "Number must be > 0")]
+        public int NumOfSeats { get; set; }
+        [Required]
+        [RegularExpression("[1-9]{1}[0-9]*", ErrorMessage = "Number must be > 0")]
+        public int NumOfBaggage { get; set; }
+        [Required]
+        public string DriverPolicy { get; set; }
+
+        public ICollection<AirDetail> AirDetail { get; set; }
     }
 }

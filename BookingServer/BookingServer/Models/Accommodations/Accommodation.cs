@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace BookingServer.Models.Accommodations
 {
@@ -7,16 +8,17 @@ namespace BookingServer.Models.Accommodations
     {
         public Accommodation()
         {
-            AccBooking = new HashSet<AccBooking>();
             Property = new HashSet<Property>();
         }
 
         public int AccId { get; set; }
+        [Required]
         public string Country { get; set; }
+        [Required]
         public string Location { get; set; }
-        public int PropCount { get; set; }
+        [Required]
+        public byte[] Picture { get; set; }
 
-        public ICollection<AccBooking> AccBooking { get; set; }
         public ICollection<Property> Property { get; set; }
     }
 }

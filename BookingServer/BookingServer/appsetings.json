@@ -11,11 +11,28 @@
 
   "JWTSettings": {
     "SecretKey": "whoWhoAreYouStranger",
-    "Issuer": "Booking Server",
-    "Audience": "Booking Website"
+    "Issuer": "http://localhost:5000",
+    "Audience": "http://localhost:4200",
+    "expiryMinutes": "10"
   },
 
   "Client": {
     "AngularSite": "http://localhost:4200"
+  },
+  "redis": {
+    "connectionString": "localhost",
+    "AbortOnConnectFail": "false"
+  },
+
+  "EmailConfiguration": {
+    "SmtpServer": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "SmtpUsername": "validtest.r.me@gmail.com",
+    "SmtpPassword": "ReversideBooking",
+
+    "PopServer": "popserver",
+    "PopPort": 995,
+    "PopUsername": "popusername",
+    "PopPassword": "poppassword"
   }
 }

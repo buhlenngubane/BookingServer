@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace BookingServer.Models.CarRentals
 {
@@ -7,16 +8,18 @@ namespace BookingServer.Models.CarRentals
     {
         public CarRental()
         {
-            CarBooking = new HashSet<CarBooking>();
-            Company = new HashSet<Company>();
+            Ccompany = new HashSet<Ccompany>();
         }
 
         public int CrentId { get; set; }
+        [Required]
         public string Location { get; set; }
-        public string PickUp { get; set; }
-        public string DropOff { get; set; }
+        [Required]
+        public string PhysicalAddress { get; set; }
+        [Required]
+        [RegularExpression("[1-9]{1}[0-9]*", ErrorMessage = "Number must be > 0")]
+        public int NumOfSuppliers { get; set; }
 
-        public ICollection<CarBooking> CarBooking { get; set; }
-        public ICollection<Company> Company { get; set; }
+        public ICollection<Ccompany> Ccompany { get; set; }
     }
 }
