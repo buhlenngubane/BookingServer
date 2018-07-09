@@ -129,7 +129,8 @@ namespace BookingServer.Controllers.CarRentals
 
                     message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
-                    await new Send(message, _emailConfiguration).To(message, _emailConfiguration);
+                    new Send(message, _emailConfiguration)//.To(message, _emailConfiguration)
+                        ;
                     return CreatedAtAction("GetFlBooking", new { id = carBooking.BookDate }, carBooking);
                 }
                 catch(Exception ex)

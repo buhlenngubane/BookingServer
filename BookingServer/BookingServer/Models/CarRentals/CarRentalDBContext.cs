@@ -13,13 +13,13 @@ namespace BookingServer.Models.CarRentals
         public virtual DbSet<Ccompany> Ccompany { get; set; }
 
         public CarRentalDBContext(DbContextOptions<CarRentalDBContext> options)
-            : base(options)
+                            : base(options)
         {
             try
             {
                 Database.EnsureCreated();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }

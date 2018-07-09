@@ -20,7 +20,7 @@ namespace BookingServer.Models.CarRentals
         [Required]
         public string Mileage { get; set; }
         [Required]
-        [RegularExpression("[1-9]*", ErrorMessage = "Number must be > 0")]
+        [RegularExpression("[1-9]{1}[0-9]*", ErrorMessage = "Number must be > 0")]
         public int CarCount { get; set; }
         [Required]
         public byte[] Picture { get; set; }

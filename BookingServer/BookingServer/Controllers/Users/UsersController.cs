@@ -52,9 +52,9 @@ namespace BookingServer.Controllers.Users
             {
                 return BadRequest(ModelState);
             }
-
+            Console.WriteLine("Password: " + password);
             var user = await _context.User.SingleOrDefaultAsync(m => m.Email.Equals(email)); //&& m.Password == password);
-            var userp = await _context.User.SingleOrDefaultAsync(m => m.Password.Equals(password));
+            var userp = await _context.User.SingleOrDefaultAsync(m => m.Password == password);
 
             try
             {
@@ -68,7 +68,7 @@ namespace BookingServer.Controllers.Users
                 }
                 else if(!user.UserId.Equals(userp.UserId))
                 {
-                    throw new Exception("User tried to log in with incorrect token");
+                    throw new Exception("User tried to log in with incorrect email password combination.");
                 }
             }
             catch(Exception ex)

@@ -7,9 +7,9 @@ namespace BookingServer.Models.Accommodations
     public partial class AccBooking
     {
         public int BookingId { get; set; }
-        [Required]
+        
         public int UserId { get; set; }
-        [Required]
+        
         public int DetailId { get; set; }
         [Required]
         [RegularExpression("[1-9]{1}[0-9]*", ErrorMessage = "Number must be > 0")]

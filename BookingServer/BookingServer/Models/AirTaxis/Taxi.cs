@@ -22,8 +22,6 @@ namespace BookingServer.Models.AirTaxis
         [Required]
         [RegularExpression("[1-9]{1}[0-9]*", ErrorMessage = "Number must be > 0")]
         public int NumOfBaggage { get; set; }
-        [Required]
-        public string DriverPolicy { get; set; }
 
         public ICollection<AirDetail> AirDetail { get; set; }
     }

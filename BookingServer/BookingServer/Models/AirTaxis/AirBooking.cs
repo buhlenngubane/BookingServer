@@ -7,9 +7,7 @@ namespace BookingServer.Models.AirTaxis
     public partial class AirBooking
     {
         public int BookingId { get; set; }
-        [Required]
         public int UserId { get; set; }
-        [Required]
         public int AirDetailId { get; set; }
         [Required]
         public string TaxiName { get; set; }

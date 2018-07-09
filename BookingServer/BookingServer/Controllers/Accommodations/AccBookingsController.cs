@@ -166,7 +166,8 @@ namespace BookingServer.Controllers.Accommodations
                     message.FromAddresses.Add(new EmailAddress("BookingServer.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
 
-                    await new Send(message, _emailConfiguration).To(message, _emailConfiguration);
+                    new Send(message, _emailConfiguration)// .To(message, _emailConfiguration)
+                        ;
 
                     await _hubContext.Clients.All.BroadcastMessage("A user has just book for "
                         + _context.Property
