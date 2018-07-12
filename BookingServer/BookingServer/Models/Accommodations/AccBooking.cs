@@ -17,6 +17,9 @@ namespace BookingServer.Models.Accommodations
         [Required]
         public DateTime BookDate { get; set; }
         [Required]
+        [RegularExpression("[1-9]{1}[0-9]*", ErrorMessage = "Number must be > 0")]
+        public int RoomsBooked { get; set; }
+        [Required]
         public string PayType { get; set; }
         [Required]
         public bool PayStatus { get; set; }

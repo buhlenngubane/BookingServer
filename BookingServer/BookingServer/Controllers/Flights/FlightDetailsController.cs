@@ -80,11 +80,13 @@ namespace BookingServer.Controllers.Flights
             var flightDetail = returnDate == null ?
             _context.FlightDetail.Include(c => c.C)
                 .Include(c => c.Dest)
+                .ThenInclude(c=>c.Flight)
                 .Where(m => m.Dest.Flight.Locale.Equals(locale) &&
                 m.Dest.Dest.Equals(destination) &&
                 m.Departure.Substring(0,10).Equals(departureDate)) :
             _context.FlightDetail.Include(c=>c.C)
                 .Include(c=>c.Dest)
+                .ThenInclude(c=>c.Flight)
                 .Where(m => m.Dest.Flight.Locale.Equals(locale) &&
                 m.Dest.Dest.Equals(destination) &&
                 m.Departure.Substring(0, 10).Equals(departureDate) &&

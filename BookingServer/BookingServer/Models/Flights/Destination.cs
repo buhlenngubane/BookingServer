@@ -14,7 +14,6 @@ namespace BookingServer.Models.Flights
         public int DestId { get; set; }
         public int FlightId { get; set; }
         [Required]
-        [RegularExpression("[1-9]{1}[0-9]*", ErrorMessage = "Number must be > 0")]
         public string Dest { get; set; }
 
         public Flight Flight { get; set; }

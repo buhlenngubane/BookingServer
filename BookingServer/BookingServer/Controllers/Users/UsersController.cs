@@ -17,6 +17,8 @@ using Google.Apis.Auth.OAuth2;
 using System.Threading;
 using System.IO;
 using MailKit.Security;
+using Serilog;
+
 
 namespace BookingServer.Controllers.Users
 {
@@ -64,7 +66,7 @@ namespace BookingServer.Controllers.Users
                         return NotFound("User not registered.");
 
                     return user==null ? 
-                        NotFound("Email not found") : NotFound("Password not found");
+                        NotFound("Email not found") : NotFound("Password not found for account");
                 }
                 else if(!user.UserId.Equals(userp.UserId))
                 {
@@ -73,8 +75,9 @@ namespace BookingServer.Controllers.Users
             }
             catch(Exception ex)
             {
+                Log.Warning(ex + "");
                 Console.WriteLine("Error : "+ex);
-                return BadRequest();
+                return NotFound("Password not found for account");
             }
             return Ok(user);
         }
@@ -106,6 +109,11 @@ namespace BookingServer.Controllers.Users
                 catch (DbUpdateConcurrencyException ex)
                 {
                     Console.WriteLine("Error updating: "+ ex);
+                    Log.Error("" + ex);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("" + ex);
                 }
                 
             }

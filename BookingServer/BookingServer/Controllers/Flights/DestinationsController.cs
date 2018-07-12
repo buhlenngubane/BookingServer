@@ -38,7 +38,9 @@ namespace BookingServer.Controllers.Flights
 
             if (!String.IsNullOrWhiteSpace(searchString))
             {
-                var destination = _context.Destination.Where(m => m.Dest.Contains(searchString));
+                var destination = _context.Destination.Where(m => m.Dest.Contains(searchString))
+                    .Include(d=>d.Flight);
+                
                 return Ok(await destination.ToListAsync());
             }
 

@@ -58,37 +58,32 @@ namespace BookingServer.Controllers.Accommodations
             {
                 return BadRequest(ModelState);
             }
-
-            var @property = _context.Property.Include(s => s.AccDetail).Where(m => m.Acc.Country.Equals(country) && 
-                m.Acc.Location.Equals(location));
-            
-
-            if (!@property.Any())
+            try
             {
-                if (location == "")
-                {
-                    var Country = _context.Property.Include(s => s.AccDetail).Where(m => m.Acc.Country.Equals(country));
 
-                    if (Country.Any())
-                    {
-                        foreach(Property p in Country)
-                        {
-                            p.Acc.Property = null;
-                        }
-                        return Ok(await Country.ToListAsync());
-                    }
+                var @property = _context.Property.Include(s => s.AccDetail).Where(m => m.Acc.Country.Equals(country) &&
+                    m.Acc.Location.Equals(location));
+
+
+                if (!@property.Any())
+                {
+
+                    return NotFound();
                 }
 
-                return NotFound();
+                /*foreach(Property p in @property)
+                {
+                    p.AccDetail = null;
+                    foreach(AccDetail ac)
+                }*/
+
+                return Ok(await @property.ToListAsync());
             }
-
-            /*foreach(Property p in @property)
+            catch(Exception ex)
             {
-                p.AccDetail = null;
-                foreach(AccDetail ac)
-            }*/
-
-            return Ok(await @property.ToListAsync());
+                Console.WriteLine(ex);
+                return BadRequest();
+            }
         }
 
         // PUT: api/Properties/5

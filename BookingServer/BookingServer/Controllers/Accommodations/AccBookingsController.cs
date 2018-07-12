@@ -37,8 +37,6 @@ namespace BookingServer.Controllers.Accommodations
         [HttpGet, Authorize(Policy = "Administrator")]
         public IEnumerable<AccBooking> GetAll()
         {
-            //if(!id.Equals(1))
-
             return _context.AccBooking;
         }
 
@@ -129,7 +127,6 @@ namespace BookingServer.Controllers.Accommodations
             if (User.Identity.Name.Equals(booking.UserId.ToString()) || User.IsInRole("Admin"))
                 try
                 {
-
                     _context.AccBooking.Add(booking);
                     await _context.SaveChangesAsync();
 
@@ -141,10 +138,9 @@ namespace BookingServer.Controllers.Accommodations
                     var user = await _userDB.User.SingleOrDefaultAsync(s => s.UserId.Equals(booking.UserId));
 
                     if (detail.First().AvailableRooms > 0)
-                        detail.First().AvailableRooms -= 1;
-                    
-
-                    Console.WriteLine("Available rooms should be 5: "+detail.First().AvailableRooms);
+                        detail.First().AvailableRooms -= booking.RoomsBooked;
+                    else
+                        throw new Exception("No rooms available for booking to proceed!");
                     
                     if (await TryUpdateModelAsync<AccDetail>(detail.First()))
                     {
@@ -155,14 +151,10 @@ namespace BookingServer.Controllers.Accommodations
                         catch (DbUpdateException  ex)
                         {
                             throw ex;
-                            //Console.WriteLine(ex);
-                            //return BadRequest("Unchanged");
                         }
                         catch (Exception ex)
                         {
-                            // Console.WriteLine(ex);
                             throw ex;
-                            //return BadRequest("Internal error!");
                         }
                     }
 
@@ -171,19 +163,16 @@ namespace BookingServer.Controllers.Accommodations
                         "You have just booked for an accommodation using our a web services, the full details of the booking are: <br/>" +
                         detail.First().Prop.Acc.Country + "<br/>" + detail.First().Prop.Acc.Location + "<br/>" +
                         detail.First().Prop.PropName + "<br/>Booking date: " + booking.BookDate + "<br/>Number of nights booked: " +
-                        booking.NumOfNights + "<br/>Total: R " + booking.Total +
+                        booking.NumOfNights + "<br/>Number of rooms booked: " + booking.RoomsBooked + "<br/>Total: R " + booking.Total +
                         "<br/><br/>Kind Regards,<br/>Booking.com");
 
                     message.FromAddresses.Add(new EmailAddress("BookingServer.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
 
-                    new Send(message, _emailConfiguration)// .To(message, _emailConfiguration)
-                        ;
+                    new Send(message, _emailConfiguration);
 
                     await _hubContext.Clients.All.BroadcastMessage("A user has just book for "
-                        + _context.Property
-                        .Where(m => m.PropId.Equals(booking.Detail.PropId))
-                        .Select(s => s.PropName) + ", " + detail.First().AvailableRooms + " left.");
+                        + detail.First().Prop.PropName + ", " + detail.First().AvailableRooms + " left.");
 
                     return CreatedAtAction("GetBooking", new { id = booking.BookingId }, booking);
                 }
@@ -194,6 +183,8 @@ namespace BookingServer.Controllers.Accommodations
                     Console.WriteLine(ex.Source);
                     Console.WriteLine(ex.StackTrace);
                     Console.WriteLine(ex.TargetSite);
+                    if (ex.Message.Contains("No rooms available"))
+                        return NotFound("Rooms are unavailable.");
                     //Console.WriteLine(booking.PropId + " total" + booking.Total);
                     return BadRequest("Internal error.");
                 }

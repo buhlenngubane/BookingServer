@@ -23,7 +23,7 @@ namespace BookingServer.Models.Flights
         public string Path { get; set; }
         [Required]
         [RegularExpression("[1-9]{1}[0-9]*", ErrorMessage = "Number must be > 0")]
-        public string Price { get; set; }
+        public int Price { get; set; }
 
         public FlCompany C { get; set; }
         public Destination Dest { get; set; }
