@@ -185,7 +185,6 @@ namespace BookingServer.Controllers.Accommodations
                     Console.WriteLine(ex.TargetSite);
                     if (ex.Message.Contains("No rooms available"))
                         return NotFound("Rooms are unavailable.");
-                    //Console.WriteLine(booking.PropId + " total" + booking.Total);
                     return BadRequest("Internal error.");
                 }
             

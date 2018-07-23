@@ -55,7 +55,7 @@ namespace BookingServer.Controllers.Users
                 return BadRequest(ModelState);
             }
             Console.WriteLine("Password: " + password);
-            var user = await _context.User.SingleOrDefaultAsync(m => m.Email.Equals(email)); //&& m.Password == password);
+            var user = await _context.User.SingleOrDefaultAsync(m => m.Email.Equals(email));
             var userp = await _context.User.SingleOrDefaultAsync(m => m.Password == password);
 
             try

@@ -56,13 +56,6 @@ namespace BookingServer.Controllers.CarRentals
                 return BadRequest(ModelState);
             }
 
-            /*if (id != carRental.CrentId)
-            {
-                return BadRequest();
-            }*/
-
-            // _context.Entry(carRental).State = EntityState.Modified;
-
             try
             {
                 _context.CarRental.Update(carRental);

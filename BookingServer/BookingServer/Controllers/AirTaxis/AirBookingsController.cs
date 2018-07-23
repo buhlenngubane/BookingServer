@@ -51,8 +51,6 @@ namespace BookingServer.Controllers.AirTaxis
                 return Ok(await user.ToListAsync());
             }
 
-            //Console.WriteLine("Should be true "+_context.Accommodation.Any(m => m.AccId.Equals(PropId)));
-
             if (_context.AirDetail.Any(m => m.AirDetailId.Equals(AirDetailId)))
                 return NotFound(AirDetailId + ", not yet booked");
             else
@@ -156,7 +154,7 @@ namespace BookingServer.Controllers.AirTaxis
 
                     message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
-                    new Send(message, _emailConfiguration)//.To(message, _emailConfiguration)
+                    new Send(message, _emailConfiguration)
                         ;
                     return CreatedAtAction("GetFlBooking", new { id = airBooking.BookDate }, airBooking);
                 }

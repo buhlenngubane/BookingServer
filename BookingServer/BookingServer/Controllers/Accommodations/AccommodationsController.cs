@@ -60,7 +60,6 @@ namespace BookingServer.Controllers.Accommodations
 
             try
             {
-                //_context.Entry(accommodation).State = EntityState.Modified;
                 _context.Accommodation.Update(accommodation);
                 Console.WriteLine("State change, yet to save.");
                 await _context.SaveChangesAsync();
@@ -115,8 +114,6 @@ namespace BookingServer.Controllers.Accommodations
                     return BadRequest(ex.Message);
                 }
             }
-
-            
         }
 
         // DELETE: api/Accommodations/5
