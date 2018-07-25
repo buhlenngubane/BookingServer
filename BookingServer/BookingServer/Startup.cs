@@ -104,8 +104,7 @@ namespace BookingServer
 
                 services.AddDistributedRedisCache(r =>
                 {
-
-                    r.Configuration = _Configuration["redis:connectionString"] + ",abortConnect = " + _Configuration["redis:AbortOnConnectFail"];
+                    r.Configuration = _Configuration["redis:connectionString"] + ",abortConnect=" + _Configuration["redis:AbortOnConnectFail"];
                 });
 
                 services.AddAuthorization(options =>
@@ -133,7 +132,6 @@ namespace BookingServer
 
                 services.AddDbContext<AccommodationDBContext>(options =>
                     options.UseSqlServer(_Configuration.GetConnectionString("AccommodationDatabase"))
-
                 );
 
                 services.AddDbContext<FlightDBContext>(options =>

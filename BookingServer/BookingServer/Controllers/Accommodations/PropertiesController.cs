@@ -60,22 +60,13 @@ namespace BookingServer.Controllers.Accommodations
             }
             try
             {
-
                 var @property = _context.Property.Include(s => s.AccDetail).Where(m => m.Acc.Country.Equals(country) &&
                     m.Acc.Location.Equals(location));
 
-
                 if (!@property.Any())
                 {
-
                     return NotFound();
                 }
-
-                /*foreach(Property p in @property)
-                {
-                    p.AccDetail = null;
-                    foreach(AccDetail ac)
-                }*/
 
                 return Ok(await @property.ToListAsync());
             }

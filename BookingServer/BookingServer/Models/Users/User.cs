@@ -18,7 +18,7 @@ namespace BookingServer.Models.Users
         [RegularExpression(@"(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&].{7,}", ErrorMessage = "Incorrect password format.")]
         public string Password { get; set; }
         [Required]
-        [RegularExpression("[0-9]{9}", ErrorMessage = "Incorrect phone number format.")]
+        //[RegularExpression("[0-9]{9}", ErrorMessage = "Incorrect phone number format.")]
         public int Phone { get; set; }
         [Required]
         public bool Admin { get; set; }

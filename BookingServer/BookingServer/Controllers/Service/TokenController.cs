@@ -10,7 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-
+using Newtonsoft.Json;
+using Serilog;
 
 namespace BookingServer.Controllers.Service
 {
@@ -34,7 +35,7 @@ namespace BookingServer.Controllers.Service
         public async Task<IActionResult> SignIn()
         {
             var user = await _context.User.SingleOrDefaultAsync(m => m.UserId.Equals(int.Parse(User.Identity.Name)));
-            return Ok(user);
+            return user != null ? Ok(user) : Ok("No user found for token.");
         }
 
         [HttpGet, Authorize]
@@ -57,7 +58,7 @@ namespace BookingServer.Controllers.Service
             catch(Exception ex)
             {
                 Console.WriteLine(ex);
-
+                Log.Error("Error refreshing userId: " + User.Identity.Name + " ", ex);
                 return response;
             }
             
@@ -74,7 +75,8 @@ namespace BookingServer.Controllers.Service
                 var userP = await _context.User.SingleOrDefaultAsync(m =>  m.Password.Equals(password));
 
                 try
-                { 
+                {
+                    Log.Debug(string.Format("Creating Token, email : " + email));
                     if (user == null || userP == null)
                     {
                         return user == null ? 
@@ -91,6 +93,7 @@ namespace BookingServer.Controllers.Service
                 catch (Exception ex)
                 {
                     Console.WriteLine(" Error creating token :" + ex);
+                    Log.Error("Error creating token for " + email + " ", ex);
                 }
 
                 return response;
@@ -104,9 +107,16 @@ namespace BookingServer.Controllers.Service
         {
             if(ModelState.IsValid)
             {
-                await _tokenManager.DeactivateCurrentAsync();
+                try
+                {
+                    await _tokenManager.DeactivateCurrentAsync();
 
-                return Ok("LoggedOut:)");
+                    return Ok("LoggedOut:)");
+                } catch(Exception ex)
+                {
+                    Log.Error("Redis not functioning correctly. ", ex);
+                    return BadRequest("Error, no token available :(");
+                }
             }
 
             return BadRequest("ModelState error! Not LoggedOut. " + ModelState);
