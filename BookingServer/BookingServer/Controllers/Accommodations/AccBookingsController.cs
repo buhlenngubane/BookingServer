@@ -132,7 +132,7 @@ namespace BookingServer.Controllers.Accommodations
                     /// Need to inner join details inorder to create receipt
 
                     var detail = _context.AccDetail.Where(s => s.DetailId.Equals(booking.DetailId))
-                                    .Include(s=>s.Prop).Include(s=>s.Prop.Acc);
+                                    .Include(s=>s.Prop).ThenInclude(s=>s.Acc);
 
                     var user = await _userDB.User.SingleOrDefaultAsync(s => s.UserId.Equals(booking.UserId));
 
