@@ -20,8 +20,7 @@ namespace BookingServer.Controllers.Accommodations
         {
             _context = context;
         }
-
-        // GET: api/Properties
+        
         [HttpGet]
         public IEnumerable<Property> GetAll()
         {

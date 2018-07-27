@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -128,22 +129,27 @@ namespace BookingServer
                 services.AddDbContext<UserDBContext>(
                     options =>
                     options.UseSqlServer(_Configuration.GetConnectionString("UserDatabase"))
+.ConfigureWarnings(warnings => warnings.Throw(CoreEventId.IncludeIgnoredWarning))
                 );
 
                 services.AddDbContext<AccommodationDBContext>(options =>
                     options.UseSqlServer(_Configuration.GetConnectionString("AccommodationDatabase"))
+.ConfigureWarnings(warnings => warnings.Throw(CoreEventId.IncludeIgnoredWarning))
                 );
 
                 services.AddDbContext<FlightDBContext>(options =>
                     options.UseSqlServer(_Configuration.GetConnectionString("FlightDatabase"))
+.ConfigureWarnings(warnings => warnings.Throw(CoreEventId.IncludeIgnoredWarning))
                 );
 
                 services.AddDbContext<CarRentalDBContext>(options =>
                     options.UseSqlServer(_Configuration.GetConnectionString("CarRentalDatabase"))
+.ConfigureWarnings(warnings => warnings.Throw(CoreEventId.IncludeIgnoredWarning))
                 );
 
                 services.AddDbContext<AirTaxiDBContext>(options =>
                     options.UseSqlServer(_Configuration.GetConnectionString("AirTaxiDatabase"))
+.ConfigureWarnings(warnings => warnings.Throw(CoreEventId.IncludeIgnoredWarning))
                 );
 
                 services.AddMvc()

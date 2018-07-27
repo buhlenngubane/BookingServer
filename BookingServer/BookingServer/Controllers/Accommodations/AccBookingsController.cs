@@ -128,7 +128,6 @@ namespace BookingServer.Controllers.Accommodations
                 try
                 {
                     _context.AccBooking.Add(booking);
-                    await _context.SaveChangesAsync();
 
                     /// Need to inner join details inorder to create receipt
 
