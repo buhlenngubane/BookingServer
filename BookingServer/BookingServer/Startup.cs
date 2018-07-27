@@ -129,27 +129,27 @@ namespace BookingServer
                 services.AddDbContext<UserDBContext>(
                     options =>
                     options.UseSqlServer(_Configuration.GetConnectionString("UserDatabase"))
-.ConfigureWarnings(warnings => warnings.Throw(CoreEventId.IncludeIgnoredWarning))
+.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.IncludeIgnoredWarning))
                 );
 
                 services.AddDbContext<AccommodationDBContext>(options =>
                     options.UseSqlServer(_Configuration.GetConnectionString("AccommodationDatabase"))
-.ConfigureWarnings(warnings => warnings.Throw(CoreEventId.IncludeIgnoredWarning))
+.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.IncludeIgnoredWarning))
                 );
 
                 services.AddDbContext<FlightDBContext>(options =>
                     options.UseSqlServer(_Configuration.GetConnectionString("FlightDatabase"))
-.ConfigureWarnings(warnings => warnings.Throw(CoreEventId.IncludeIgnoredWarning))
+.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.IncludeIgnoredWarning))
                 );
 
                 services.AddDbContext<CarRentalDBContext>(options =>
                     options.UseSqlServer(_Configuration.GetConnectionString("CarRentalDatabase"))
-.ConfigureWarnings(warnings => warnings.Throw(CoreEventId.IncludeIgnoredWarning))
+.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.IncludeIgnoredWarning))
                 );
 
                 services.AddDbContext<AirTaxiDBContext>(options =>
                     options.UseSqlServer(_Configuration.GetConnectionString("AirTaxiDatabase"))
-.ConfigureWarnings(warnings => warnings.Throw(CoreEventId.IncludeIgnoredWarning))
+.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.IncludeIgnoredWarning))
                 );
 
                 services.AddMvc()

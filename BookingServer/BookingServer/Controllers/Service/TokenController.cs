@@ -35,6 +35,7 @@ namespace BookingServer.Controllers.Service
         public async Task<IActionResult> SignIn()
         {
             var user = await _context.User.SingleOrDefaultAsync(m => m.UserId.Equals(int.Parse(User.Identity.Name)));
+            if (user == null) Log.Error(User.Identity.Name + " not found in database.");
             return user != null ? Ok(user) : Ok("No user found for token.");
         }
 
@@ -44,13 +45,17 @@ namespace BookingServer.Controllers.Service
             IActionResult response = BadRequest("Unable to refresh token!");
             try
             {
-                var user = await _context.User.SingleOrDefaultAsync(m => m.UserId.Equals(int.Parse(User.Identity.Name)));
+                // var user = await _context.User.SingleOrDefaultAsync(m => m.UserId.Equals(int.Parse(User.Identity.Name)));
+                if(!await _context.User.AnyAsync(m => m.UserId.Equals(int.Parse(User.Identity.Name))))
+                {
+                    throw new Exception("User not found in database.");
+                }
                 
                 await _tokenManager.DeactivateCurrentAsync();
 
                 Console.WriteLine("Deactivating user" + User.Claims + " UserId : "+ User.Identity.Name);
 
-                var tokenString = BuildToken(user);
+                var tokenString = BuildToken(new Models.Users.User { UserId = int.Parse(User.Identity.Name), Admin = User.IsInRole("Admin") });
                 response = Ok(new { token = tokenString });
                 Console.WriteLine("New Token for userId: "+ User.Identity.Name + " token: " + tokenString);
                 return response;
@@ -114,7 +119,7 @@ namespace BookingServer.Controllers.Service
                     return Ok("LoggedOut :)");
                 } catch(Exception ex)
                 {
-                    Log.Error("Redis possibly not functioning correctly. ", ex);
+                    Log.Error("Redis possibly not functioning correctly. UserId: " + User.Identity.Name, ex);
                     return BadRequest("Error, no token available for logout :(");
                 }
             }

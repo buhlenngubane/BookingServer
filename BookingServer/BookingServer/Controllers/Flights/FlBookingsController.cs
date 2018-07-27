@@ -100,8 +100,7 @@ namespace BookingServer.Controllers.Flights
 
             return NoContent();
         }
-
-        // POST: api/FlBookings
+        
         [HttpPost]
         public async Task<IActionResult> New([FromBody] FlBooking flBooking)
         {
@@ -119,7 +118,7 @@ namespace BookingServer.Controllers.Flights
                         .Include(s => s.Dest).ThenInclude(s => s.Flight);
                     _context.FlBooking.Add(flBooking);
                     await _context.SaveChangesAsync();
-                    // EmailAddress address = new EmailAddress();
+
                     var Return = flBooking.ReturnDate.HasValue ? flBooking.ReturnDate : null;
                     var names = flBooking.TravellersNames.Split(',');
                     var surnames = flBooking.TravellersSurnames.Split(',');
@@ -145,8 +144,7 @@ namespace BookingServer.Controllers.Flights
 
                     message.FromAddresses.Add(new EmailAddress("Booking.com", "validtest.r.me@gmail.com"));
                     message.ToAddresses.Add(new EmailAddress(user.Name, user.Email));
-                    new Send(message, _emailConfiguration)//.To(message, _emailConfiguration)
-                        ;
+                    new Send(message, _emailConfiguration);
                     return CreatedAtAction("GetFlBooking", new { id = flBooking.BookDate }, flBooking);
                 }
                 catch(Exception ex)
@@ -158,8 +156,7 @@ namespace BookingServer.Controllers.Flights
 
             return Unauthorized();
         }
-
-        // DELETE: api/FlBookings/5
+        
         [HttpDelete("{id}"), Authorize(Policy = "Administrator")]
         public async Task<IActionResult> DeleteFlBooking([FromRoute] int id)
         {

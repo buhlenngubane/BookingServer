@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using BookingServer.Models.Accommodations;
 using Microsoft.AspNetCore.Authorization;
 using BookingServer.Services;
+using Serilog;
 
 namespace BookingServer.Controllers.Accommodations
 {
@@ -38,13 +39,14 @@ namespace BookingServer.Controllers.Accommodations
             try
             {
                 var accommodation = _context.AccDetail.Where(s => s.Prop.Acc.AccId.Equals(id))
-                    .Include(s => s.Prop).Include(s => s.Prop.Acc).Include(s=>s.AccBooking);
+                    .Include(s => s.Prop).ThenInclude(s => s.Acc).Include(s=>s.AccBooking);
 
                 return Ok(await accommodation.ToListAsync());
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Console.WriteLine("Error on properties controllers "+ex);
+                Log.Error("Error on properties controllers ", ex);
                 return BadRequest();
             }
         }
@@ -72,6 +74,7 @@ namespace BookingServer.Controllers.Accommodations
             catch(Exception ex)
             {
                 Console.WriteLine(ex);
+                Log.Error("GetProperty error " + country + " " + location,ex);
                 return BadRequest();
             }
         }
@@ -106,6 +109,7 @@ namespace BookingServer.Controllers.Accommodations
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+                Log.Error( string.Format("PutProperty error ", @property), ex);
                 return BadRequest();
             }
 
@@ -129,6 +133,7 @@ namespace BookingServer.Controllers.Accommodations
             catch(Exception ex)
             {
                 Console.WriteLine("Error: " + ex);
+                Log.Error(string.Format("PostProperty error ", @property), ex);
                 return NoContent();
             }
 
@@ -151,6 +156,7 @@ namespace BookingServer.Controllers.Accommodations
             catch (Exception ex)
             {
                 Console.WriteLine("Error: " + ex);
+                Log.Error(string.Format("PostProperty error ", properties), ex);
                 return NoContent();
             }
             //foreach (Property prop in properties)
@@ -171,7 +177,7 @@ namespace BookingServer.Controllers.Accommodations
                 await _context.Property.SingleOrDefaultAsync(m => m.PropName.Equals(PropName));
             if (@property == null)
             {
-                return NotFound();
+                return NotFound("No property found.");
             }
             
             try
@@ -182,6 +188,8 @@ namespace BookingServer.Controllers.Accommodations
             catch(Exception ex)
             {
                 Console.WriteLine("Error: "+ex);
+                Log.Error("DeleteProperty error " + PropName, ex);
+                return new JsonResult("Error deleting!") { StatusCode = 500 };
             }
 
             return Ok(@property);
