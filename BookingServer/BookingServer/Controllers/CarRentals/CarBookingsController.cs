@@ -119,7 +119,7 @@ namespace BookingServer.Controllers.CarRentals
                     var user = await _usersDBContext.User.SingleOrDefaultAsync(s =>
                     s.UserId.Equals(carBooking.UserId));
                     var detail = _context.Car.Where(s => s.CarId.Equals(carBooking.CarId))
-                        .Include(s => s.Cmp).Include(s => s.Cmp.Crent).Include(s => s.Ctype);
+                        .Include(s => s.Cmp).ThenInclude(s => s.Crent).Include(s => s.Ctype);
                     _context.CarBooking.Add(carBooking);
                     await _context.SaveChangesAsync();
                     // EmailAddress address = new EmailAddress();

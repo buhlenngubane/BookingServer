@@ -23,11 +23,12 @@ namespace BookingServer
             columnOptions.Store.Add(StandardColumn.LogEvent);
 
             Log.Logger = new LoggerConfiguration()
+                
             .MinimumLevel.Debug()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            //.MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .WriteTo.MSSqlServer(Configuration.GetConnectionString("UserDatabase"), "Logs", columnOptions: columnOptions)
-            .WriteTo.Console()
+            .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
             .CreateLogger();
 
             try

@@ -137,7 +137,7 @@ namespace BookingServer.Controllers.AirTaxis
                 {
                     var user = await _userDB.User.SingleOrDefaultAsync(s => s.UserId.Equals(airBooking.UserId));
                     var detail = _context.AirDetail.Where(s => s.AirDetailId.Equals(airBooking.AirDetailId))
-                        .Include(s => s.DropOff).Include(s => s.DropOff.PickUp).Include(s => s.Taxi);
+                        .Include(s => s.DropOff).ThenInclude(s => s.PickUp).Include(s => s.Taxi);
                     _context.AirBooking.Add(airBooking);
                     await _context.SaveChangesAsync();
                     // EmailAddress address = new EmailAddress();

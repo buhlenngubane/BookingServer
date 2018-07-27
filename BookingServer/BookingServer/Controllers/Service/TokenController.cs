@@ -111,11 +111,11 @@ namespace BookingServer.Controllers.Service
                 {
                     await _tokenManager.DeactivateCurrentAsync();
 
-                    return Ok("LoggedOut:)");
+                    return Ok("LoggedOut :)");
                 } catch(Exception ex)
                 {
-                    Log.Error("Redis not functioning correctly. ", ex);
-                    return BadRequest("Error, no token available :(");
+                    Log.Error("Redis possibly not functioning correctly. ", ex);
+                    return BadRequest("Error, no token available for logout :(");
                 }
             }
 
@@ -130,8 +130,6 @@ namespace BookingServer.Controllers.Service
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
                 string role = "";
-
-                Console.WriteLine(user.Admin);
 
                 if (user.Admin.Equals(true))
                     role = "Admin";
@@ -154,6 +152,7 @@ namespace BookingServer.Controllers.Service
             catch(Exception ex)
             {
                 Console.WriteLine("Token error: " + ex);
+                Log.Error("Token error : ",ex);
                 throw ex;
             }
         }

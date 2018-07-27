@@ -116,7 +116,7 @@ namespace BookingServer.Controllers.Flights
                 {
                     var user = await _userDB.User.SingleOrDefaultAsync(s => s.UserId.Equals(flBooking.UserId));
                     var detail = _context.FlightDetail.Where(s => s.DetailId.Equals(flBooking.DetailId))
-                        .Include(s => s.Dest).Include(s => s.Dest.Flight);
+                        .Include(s => s.Dest).ThenInclude(s => s.Flight);
                     _context.FlBooking.Add(flBooking);
                     await _context.SaveChangesAsync();
                     // EmailAddress address = new EmailAddress();
